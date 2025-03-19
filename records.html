@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR System - Medical Records</title>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --accent-color: #4d8bf0;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+            --hover-color: #2d5ca8;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--secondary-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info span {
+            font-weight: 500;
+        }
+        
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .card {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: rgba(77, 139, 240, 0.1);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+        
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .search-bar {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .search-bar input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .search-bar button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        
+        .pagination button {
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .pagination button.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+        
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--success-color);
+        }
+        
+        .badge-danger {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .badge-warning {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .record-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .record-actions button {
+            padding: 5px 8px;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .record-actions button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .record-actions button.view {
+            color: var(--accent-color);
+        }
+        
+        .record-actions button.approve {
+            color: var(--success-color);
+        }
+        
+        .filter-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .filter-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: border-color 0.2s;
+        }
+        
+        .filter-tab.active {
+            border-bottom-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .page-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .page-title h2 {
+            margin: 0;
+            color: var(--accent-color);
+        }
+        
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            color: var(--accent-color);
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin: 20px auto;
+            text-align: center;
+        }
+        
+        .loading-spinner div {
+            border: 5px solid var(--border-color);
+            border-top: 5px solid var(--accent-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>Military EHR System</h1>
+        </div>
+        <div class="user-info">
+            <span id="username">Loading...</span>
+            <button class="btn" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="page-title">
+            <h2 id="listTitle">Medical Records</h2>
+            <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+        
+        <div class="filter-tabs">
+            <div class="filter-tab" data-filter="all">All Records</div>
+            <div class="filter-tab" data-filter="pending">Pending Records</div>
+            <div class="filter-tab" data-filter="approved">Approved Records</div>
+            <div class="filter-tab" data-filter="rejected">Rejected Records</div>
+        </div>
+        
+        <div class="card">
+            <div class="search-bar">
+                <input type="text" id="searchRecord" placeholder="Search records...">
+                <button id="searchBtn">Search</button>
+            </div>
+            
+            <div class="loading-spinner" id="loadingSpinner">
+                <div></div>
+                <p>Loading medical records...</p>
+            </div>
+            
+            <table id="recordsTable">
+                <thead>
+                    <tr>
+                        <th>Record ID</th>
+                        <th>Date</th>
+                        <th>Patient</th>
+                        <th>Provider</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsList">
+                    <!-- Record data will be populated here -->
+                </tbody>
+            </table>
+            
+            <div class="pagination" id="pagination">
+                <!-- Pagination buttons will be added dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentFilter = 'all';
+        let currentPage = 1;
+        let totalPages = 1;
+        let recordsPerPage = 10;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('ehrToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set username from token
+            const username = localStorage.getItem('ehrUsername');
+            document.getElementById('username').textContent = username || 'User';
+            
+            // Logout function
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('ehrToken');
+                localStorage.removeItem('ehrUsername');
+                window.location.href = 'login.html';
+            });
+            
+            // Get filter from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const filterParam = urlParams.get('filter');
+            if (filterParam) {
+                currentFilter = filterParam;
+            }
+            
+            // Update active tab
+            updateFilterTabs();
+            
+            // Set up filter tab clicks
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    currentFilter = this.dataset.filter;
+                    updateFilterTabs();
+                    loadRecords();
+                });
+            });
+            
+            // Set up search button
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                loadRecords();
+            });
+            
+            // Load record data
+            loadRecords();
+        });
+        
+        function updateFilterTabs() {
+            // Update tab styling
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                if (tab.dataset.filter === currentFilter) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update page title
+            const listTitle = document.getElementById('listTitle');
+            switch (currentFilter) {
+                case 'all':
+                    listTitle.textContent = 'All Medical Records';
+                    break;
+                case 'pending':
+                    listTitle.textContent = 'Pending Medical Records';
+                    break;
+                case 'approved':
+                    listTitle.textContent = 'Approved Medical Records';
+                    break;
+                case 'rejected':
+                    listTitle.textContent = 'Rejected Medical Records';
+                    break;
+                default:
+                    listTitle.textContent = 'Medical Records';
+            }
+        }
+        
+        function loadRecords() {
+            // Show loading spinner
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = 'block';
+            
+            // For demo purposes, we're using generated data
+            // In a real app, this would fetch from an API
+            setTimeout(() => {
+                spinner.style.display = 'none';
+                
+                // Generate records
+                let records = generateSampleRecords();
+                
+                // Filter records based on current filter
+                if (currentFilter !== 'all') {
+                    records = records.filter(record => record.status.toLowerCase() === currentFilter);
+                }
+                
+                // Filter records based on search term
+                const searchTerm = document.getElementById('searchRecord').value.toLowerCase();
+                if (searchTerm) {
+                    records = records.filter(record => 
+                        record.patient.toLowerCase().includes(searchTerm) ||
+                        record.provider.toLowerCase().includes(searchTerm) ||
+                        record.type.toLowerCase().includes(searchTerm) ||
+                        record.id.toString().includes(searchTerm)
+                    );
+                }
+                
+                // Update pagination
+                totalPages = Math.ceil(records.length / recordsPerPage);
+                updatePagination();
+                
+                // Paginate records
+                const start = (currentPage - 1) * recordsPerPage;
+                const end = start + recordsPerPage;
+                const paginatedRecords = records.slice(start, end);
+                
+                // Render records
+                renderRecords(paginatedRecords);
+            }, 800); // Simulate network delay
+        }
+        
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.textContent = '←';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadRecords();
+                }
+            });
+            pagination.appendChild(prevButton);
+            
+            // Page buttons
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                if (i === currentPage) {
+                    pageButton.classList.add('active');
+                }
+                pageButton.addEventListener('click', function() {
+                    currentPage = i;
+                    loadRecords();
+                });
+                pagination.appendChild(pageButton);
+            }
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.textContent = '→';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadRecords();
+                }
+            });
+            pagination.appendChild(nextButton);
+        }
+        
+        function renderRecords(records) {
+            const tbody = document.getElementById('recordsList');
+            tbody.innerHTML = '';
+            
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No medical records found</td></tr>';
+                return;
+            }
+            
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                
+                // Determine record status and badge style
+                let statusClass;
+                switch (record.status.toLowerCase()) {
+                    case 'approved':
+                        statusClass = 'success';
+                        break;
+                    case 'pending':
+                        statusClass = 'warning';
+                        break;
+                    case 'rejected':
+                        statusClass = 'danger';
+                        break;
+                    default:
+                        statusClass = '';
+                }
+                
+                row.innerHTML = `
+                    <td>${record.id}</td>
+                    <td>${formatDate(record.date)}</td>
+                    <td>${record.patient}</td>
+                    <td>${record.provider}</td>
+                    <td>${record.type}</td>
+                    <td><span class="badge badge-${statusClass}">${record.status}</span></td>
+                    <td>
+                        <div class="record-actions">
+                            <button class="view" onclick="viewRecord(${record.id})">View</button>
+                            ${record.status.toLowerCase() === 'pending' ? 
+                                `<button class="approve" onclick="approveRecord(${record.id})">Approve</button>` : ''}
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function generateSampleRecords() {
+            // This is only used for demo purposes
+            // In a real application, this data would come from an API
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            const lastWeek = new Date(today);
+            lastWeek.setDate(lastWeek.getDate() - 7);
+            
+            const lastMonth = new Date(today);
+            lastMonth.setMonth(lastMonth.getMonth() - 1);
+            
+            return [
+                {
+                    id: 1,
+                    date: today.toISOString(),
+                    patient: 'Calderon, Stacey',
+                    provider: 'Dr. Smith',
+                    type: 'Progress Note',
+                    status: 'Pending'
+                },
+                {
+                    id: 2,
+                    date: today.toISOString(),
+                    patient: 'Williams, Ian',
+                    provider: 'Dr. Johnson',
+                    type: 'Lab Results',
+                    status: 'Pending'
+                },
+                {
+                    id: 3,
+                    date: yesterday.toISOString(),
+                    patient: 'Castaneda, Michael',
+                    provider: 'Dr. Smith',
+                    type: 'Radiology Report',
+                    status: 'Approved'
+                },
+                {
+                    id: 4,
+                    date: yesterday.toISOString(),
+                    patient: 'Howard, Matthew',
+                    provider: 'Dr. Brown',
+                    type: 'Medication Order',
+                    status: 'Rejected'
+                },
+                {
+                    id: 5,
+                    date: lastWeek.toISOString(),
+                    patient: 'Torres, Sophia',
+                    provider: 'Dr. Johnson',
+                    type: 'Progress Note',
+                    status: 'Approved'
+                },
+                {
+                    id: 6,
+                    date: lastWeek.toISOString(),
+                    patient: 'Calderon, Stacey',
+                    provider: 'Dr. Brown',
+                    type: 'Consultation',
+                    status: 'Approved'
+                },
+                {
+                    id: 7,
+                    date: lastWeek.toISOString(),
+                    patient: 'Williams, Ian',
+                    provider: 'Dr. Smith',
+                    type: 'Discharge Summary',
+                    status: 'Pending'
+                },
+                {
+                    id: 8,
+                    date: lastMonth.toISOString(),
+                    patient: 'Howard, Matthew',
+                    provider: 'Dr. Johnson',
+                    type: 'Operative Report',
+                    status: 'Approved'
+                },
+                {
+                    id: 9,
+                    date: lastMonth.toISOString(),
+                    patient: 'Torres, Sophia',
+                    provider: 'Dr. Smith',
+                    type: 'Progress Note',
+                    status: 'Approved'
+                },
+                {
+                    id: 10,
+                    date: lastMonth.toISOString(),
+                    patient: 'Castaneda, Michael',
+                    provider: 'Dr. Brown',
+                    type: 'Consultation',
+                    status: 'Rejected'
+                },
+                {
+                    id: 11,
+                    date: today.toISOString(),
+                    patient: 'Howard, Matthew',
+                    provider: 'Dr. Smith',
+                    type: 'Lab Results',
+                    status: 'Pending'
+                },
+                {
+                    id: 12,
+                    date: yesterday.toISOString(),
+                    patient: 'Torres, Sophia',
+                    provider: 'Dr. Johnson',
+                    type: 'Medication Order',
+                    status: 'Pending'
+                }
+            ];
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+        
+        function viewRecord(recordId) {
+            // In a real app, this would navigate to a detailed view
+            alert(`View medical record details for ID: ${recordId}`);
+        }
+        
+        function approveRecord(recordId) {
+            // In a real app, this would update the record status via API
+            alert(`Record ID ${recordId} has been approved!`);
+            
+            // Reload the records to reflect the change
+            loadRecords();
+        }
+    </script>
+</body>
+</html> 

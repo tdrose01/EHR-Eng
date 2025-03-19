@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR System - Edit Patient</title>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --accent-color: #4d8bf0;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+            --hover-color: #2d5ca8;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--secondary-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info span {
+            font-weight: 500;
+        }
+        
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .btn-secondary {
+            background-color: var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #444;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        .form-container {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .form-title {
+            color: var(--accent-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section-title {
+            color: var(--accent-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-message {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .status-message.success {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        
+        .status-message.error {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .loading-overlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <header>
+        <div class="logo">
+            <h1>Military EHR System</h1>
+        </div>
+        <div class="user-info">
+            <span id="username">Loading...</span>
+            <button class="btn" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="status-message" id="statusMessage"></div>
+        
+        <div class="form-container">
+            <h2 class="form-title">Edit Patient</h2>
+            
+            <form id="patientForm">
+                <div class="form-section">
+                    <h3 class="form-section-title">Personal Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="first_name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="last_name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="date_of_birth" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="form-section-title">Military Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="rank">Rank</label>
+                            <select id="rank" name="rank">
+                                <option value="">Select Rank</option>
+                                <option value="E-1">E-1</option>
+                                <option value="E-2">E-2</option>
+                                <option value="E-3">E-3</option>
+                                <option value="E-4">E-4</option>
+                                <option value="E-5">E-5</option>
+                                <option value="E-6">E-6</option>
+                                <option value="E-7">E-7</option>
+                                <option value="E-8">E-8</option>
+                                <option value="E-9">E-9</option>
+                                <option value="O-1">O-1</option>
+                                <option value="O-2">O-2</option>
+                                <option value="O-3">O-3</option>
+                                <option value="O-4">O-4</option>
+                                <option value="O-5">O-5</option>
+                                <option value="O-6">O-6</option>
+                                <option value="O-7">O-7</option>
+                                <option value="O-8">O-8</option>
+                                <option value="O-9">O-9</option>
+                                <option value="O-10">O-10</option>
+                                <option value="W-1">W-1</option>
+                                <option value="W-2">W-2</option>
+                                <option value="W-3">W-3</option>
+                                <option value="W-4">W-4</option>
+                                <option value="W-5">W-5</option>
+                                <option value="CIV">CIV</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="service">Service</label>
+                            <select id="service" name="service">
+                                <option value="">Select Service</option>
+                                <option value="Army">Army</option>
+                                <option value="Navy">Navy</option>
+                                <option value="Air Force">Air Force</option>
+                                <option value="Marine Corps">Marine Corps</option>
+                                <option value="Coast Guard">Coast Guard</option>
+                                <option value="Space Force">Space Force</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fmpc">FMPC</label>
+                            <input type="text" id="fmpc" name="fmpc">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="form-section-title">Contact Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="contactNumber">Contact Number</label>
+                            <input type="tel" id="contactNumber" name="contact_number">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="form-section-title">Emergency Contact</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="emergencyContact">Emergency Contact Name</label>
+                            <input type="text" id="emergencyContact" name="emergency_contact">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="emergencyContactNumber">Emergency Contact Number</label>
+                            <input type="tel" id="emergencyContactNumber" name="emergency_contact_number">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="form-section-title">Medical Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="bloodType">Blood Type</label>
+                            <select id="bloodType" name="blood_type">
+                                <option value="">Select Blood Type</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="allergies">Allergies</label>
+                            <textarea id="allergies" name="allergies" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="medicalConditions">Medical Conditions</label>
+                            <textarea id="medicalConditions" name="medical_conditions" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn" id="saveBtn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get patient ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const patientId = urlParams.get('id');
+        
+        // Global variables
+        let originalPatientData = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('ehrToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set username from token
+            const username = localStorage.getItem('ehrUsername');
+            document.getElementById('username').textContent = username || 'User';
+            
+            // Logout function
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('ehrToken');
+                localStorage.removeItem('ehrUsername');
+                window.location.href = 'login.html';
+            });
+            
+            // Cancel button action
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                window.location.href = 'dashboard.html';
+            });
+            
+            // Form submission
+            document.getElementById('patientForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updatePatient();
+            });
+            
+            // Check if patient ID is provided
+            if (!patientId) {
+                showStatusMessage('No patient ID provided.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+                return;
+            }
+            
+            // Load patient data
+            loadPatient(patientId);
+        });
+        
+        function showLoading(show = true) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                overlay.classList.add('visible');
+            } else {
+                overlay.classList.remove('visible');
+            }
+        }
+        
+        function showStatusMessage(message, type = 'success') {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        function loadPatient(patientId) {
+            showLoading(true);
+            
+            fetch(`http://localhost:8002/api/patients/${patientId}`)
+                .then(response => response.json())
+                .then(data => {
+                    showLoading(false);
+                    
+                    if (data.success) {
+                        // Store original data for comparison
+                        originalPatientData = data.patient;
+                        
+                        // Fill form with patient data
+                        fillPatientForm(data.patient);
+                    } else {
+                        showStatusMessage(`Error: ${data.message}`, 'error');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    showLoading(false);
+                    console.error('Error:', error);
+                    showStatusMessage(`Error loading patient data: ${error.message}`, 'error');
+                });
+        }
+        
+        function fillPatientForm(patient) {
+            // Personal information
+            document.getElementById('firstName').value = patient.first_name || '';
+            document.getElementById('lastName').value = patient.last_name || '';
+            
+            // Format date for date input (YYYY-MM-DD)
+            if (patient.date_of_birth) {
+                const dob = new Date(patient.date_of_birth);
+                const formattedDob = dob.toISOString().split('T')[0];
+                document.getElementById('dateOfBirth').value = formattedDob;
+            }
+            
+            document.getElementById('gender').value = patient.gender || '';
+            
+            // Military information
+            document.getElementById('rank').value = patient.rank || '';
+            document.getElementById('service').value = patient.service || '';
+            document.getElementById('fmpc').value = patient.fmpc || '';
+            
+            // Contact information
+            document.getElementById('contactNumber').value = patient.contact_number || '';
+            document.getElementById('email').value = patient.email || '';
+            document.getElementById('address').value = patient.address || '';
+            
+            // Emergency contact
+            document.getElementById('emergencyContact').value = patient.emergency_contact || '';
+            document.getElementById('emergencyContactNumber').value = patient.emergency_contact_number || '';
+            
+            // Medical information
+            document.getElementById('bloodType').value = patient.blood_type || '';
+            document.getElementById('allergies').value = patient.allergies || '';
+            document.getElementById('medicalConditions').value = patient.medical_conditions || '';
+        }
+        
+        function getFormData() {
+            const formData = {};
+            
+            // Get all form elements
+            const form = document.getElementById('patientForm');
+            const formElements = form.elements;
+            
+            // Extract values
+            for (let i = 0; i < formElements.length; i++) {
+                const element = formElements[i];
+                if (element.name && element.name !== '') {
+                    formData[element.name] = element.value;
+                }
+            }
+            
+            return formData;
+        }
+        
+        function updatePatient() {
+            const formData = getFormData();
+            
+            // Add patient ID to the data
+            formData.patient_id = patientId;
+            
+            // Disable save button and show loading state
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.textContent;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+            
+            showLoading(true);
+            
+            fetch(`http://localhost:8002/api/patients/${patientId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                
+                if (data.success) {
+                    showStatusMessage('Patient updated successfully!');
+                    
+                    // Redirect back to dashboard after a delay
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                } else {
+                    showStatusMessage(`Error: ${data.message}`, 'error');
+                    // Re-enable save button
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                console.error('Error:', error);
+                showStatusMessage(`Error updating patient: ${error.message}`, 'error');
+                
+                // Re-enable save button
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+            });
+        }
+    </script>
+</body>
+</html> 

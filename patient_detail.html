@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR System - Patient Detail</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0f1420;
+            color: #ffffff;
+        }
+        
+        .navbar {
+            background-color: #131b2e;
+            padding: 15px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e2a45;
+        }
+        
+        .navbar .brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4d8bf0;
+        }
+        
+        .navbar .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .navbar .nav-links a {
+            color: #4d8bf0;
+            text-decoration: none;
+        }
+        
+        .navbar .user-info {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .navbar .user-info a {
+            color: #4d8bf0;
+            text-decoration: none;
+        }
+        
+        .container {
+            padding: 30px 80px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #4d8bf0;
+            font-size: 28px;
+        }
+        
+        .back-button {
+            background-color: transparent;
+            border: none;
+            color: #4d8bf0;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-button:before {
+            content: "←";
+            margin-right: 8px;
+            font-size: 20px;
+        }
+        
+        .edit-button {
+            background-color: #4d8bf0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        
+        .patient-info {
+            display: flex;
+            margin-bottom: 30px;
+        }
+        
+        .patient-info-left {
+            flex: 1;
+        }
+        
+        .patient-info-right {
+            flex: 1;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #4d8bf0;
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #1e2a45;
+            padding-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background-color: #131b2e;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px 15px;
+            background-color: #1e2a45;
+            color: #4d8bf0;
+            font-weight: normal;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #1e2a45;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .data-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .data-label {
+            width: 150px;
+            color: #4d8bf0;
+        }
+        
+        .data-value {
+            flex: 1;
+        }
+        
+        .tab-container {
+            margin-top: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #1e2a45;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #4d8bf0;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid #4d8bf0;
+        }
+        
+        .tab-content {
+            padding: 20px 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="brand">EHR System</div>
+        <div class="nav-links">
+            <a href="#">Dashboard</a>
+            <a href="test_login.html">Patients</a>
+            <a href="#">Appointments</a>
+            <a href="#">Medical Records</a>
+        </div>
+        <div class="user-info">
+            <span>Welcome, Admin User 2</span>
+            <a href="#">Logout</a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <div class="header">
+            <div>
+                <button class="back-button" onclick="window.location.href='test_login.html'">Back to Patients</button>
+                <h1 id="patient-name">Patient Detail</h1>
+            </div>
+            <button class="edit-button">Edit Patient</button>
+        </div>
+        
+        <!-- Patient Information Table -->
+        <div class="section">
+            <h2>Patient Information</h2>
+            <table>
+                <tr>
+                    <th>Patient ID</th>
+                    <td id="patient-id"></td>
+                    <th>Date of Birth</th>
+                    <td id="patient-dob"></td>
+                </tr>
+                <tr>
+                    <th>Full Name</th>
+                    <td id="patient-fullname"></td>
+                    <th>Gender</th>
+                    <td id="patient-gender"></td>
+                </tr>
+                <tr>
+                    <th>Phone Number</th>
+                    <td id="patient-phone"></td>
+                    <th>Email</th>
+                    <td id="patient-email"></td>
+                </tr>
+                <tr>
+                    <th>Address</th>
+                    <td id="patient-address" colspan="3"></td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- Insurance Information Table -->
+        <div class="section">
+            <h2>Insurance Information</h2>
+            <table>
+                <tr>
+                    <th>Insurance Provider</th>
+                    <td id="insurance-provider"></td>
+                    <th>Insurance ID</th>
+                    <td id="insurance-id"></td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- Medical Information Table -->
+        <div class="section">
+            <h2>Medical Information</h2>
+            <table>
+                <tr>
+                    <th>Blood Type</th>
+                    <td id="blood-type"></td>
+                    <th>Allergies</th>
+                    <td id="allergies"></td>
+                </tr>
+                <tr>
+                    <th>Medical Conditions</th>
+                    <td id="medical-conditions" colspan="3"></td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- Emergency Contact Information Table -->
+        <div class="section">
+            <h2>Emergency Contact</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <td id="emergency-contact"></td>
+                    <th>Phone</th>
+                    <td id="emergency-phone"></td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- Service Information Table -->
+        <div class="section">
+            <h2>Service Information</h2>
+            <table>
+                <tr>
+                    <th>Service</th>
+                    <td id="service"></td>
+                    <th>Rank</th>
+                    <td id="rank"></td>
+                </tr>
+                <tr>
+                    <th>FMPC</th>
+                    <td id="fmpc" colspan="3"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+        
+        // Function to fetch patient data
+        async function fetchPatientData() {
+            const patientId = getUrlParameter('id') || '2'; // Default to ID 2 if not specified
+            
+            try {
+                // In a real application, this would be an API call
+                // For demo purposes, we'll use sample data
+                const patientData = {
+                    patient_id: patientId,
+                    first_name: "Robert",
+                    last_name: "Johnson",
+                    date_of_birth: "1990-03-08",
+                    gender: "Male",
+                    contact_number: "555-456-7890",
+                    email: "robert.johnson@example.com",
+                    address: "123 Main St, Anytown, USA 12345",
+                    emergency_contact: "Sarah Johnson",
+                    emergency_contact_number: "555-123-4567",
+                    blood_type: "O+",
+                    allergies: "Penicillin, Peanuts",
+                    medical_conditions: "Hypertension, Asthma",
+                    service: "Army",
+                    rank: "Captain",
+                    fmpc: "Fort Bragg",
+                    insurance_provider: "Cigna",
+                    insurance_id: "CI345678"
+                };
+                
+                // Update the UI with patient data
+                document.getElementById('patient-name').textContent = `${patientData.first_name} ${patientData.last_name}`;
+                document.getElementById('patient-id').textContent = patientData.patient_id;
+                document.getElementById('patient-fullname').textContent = `${patientData.first_name} ${patientData.last_name}`;
+                document.getElementById('patient-dob').textContent = formatDate(patientData.date_of_birth);
+                document.getElementById('patient-gender').textContent = patientData.gender;
+                document.getElementById('patient-phone').textContent = patientData.contact_number;
+                document.getElementById('patient-email').textContent = patientData.email;
+                document.getElementById('patient-address').textContent = patientData.address;
+                document.getElementById('insurance-provider').textContent = patientData.insurance_provider;
+                document.getElementById('insurance-id').textContent = patientData.insurance_id;
+                document.getElementById('blood-type').textContent = patientData.blood_type;
+                document.getElementById('allergies').textContent = patientData.allergies;
+                document.getElementById('medical-conditions').textContent = patientData.medical_conditions;
+                document.getElementById('emergency-contact').textContent = patientData.emergency_contact;
+                document.getElementById('emergency-phone').textContent = patientData.emergency_contact_number;
+                document.getElementById('service').textContent = patientData.service;
+                document.getElementById('rank').textContent = patientData.rank;
+                document.getElementById('fmpc').textContent = patientData.fmpc;
+                
+            } catch (error) {
+                console.error('Error fetching patient data:', error);
+            }
+        }
+        
+        // Helper function to format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+        }
+        
+        // Load patient data when the page loads
+        document.addEventListener('DOMContentLoaded', fetchPatientData);
+    </script>
+</body>
+</html> 

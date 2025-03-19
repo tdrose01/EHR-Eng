@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR System - Appointments</title>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --accent-color: #4d8bf0;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+            --hover-color: #2d5ca8;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--secondary-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info span {
+            font-weight: 500;
+        }
+        
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .card {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: rgba(77, 139, 240, 0.1);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+        
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        
+        .pagination button {
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .pagination button.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+        
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--success-color);
+        }
+        
+        .badge-danger {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .badge-warning {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .appointment-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .appointment-actions button {
+            padding: 5px 8px;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .appointment-actions button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .appointment-actions button.view {
+            color: var(--accent-color);
+        }
+        
+        .appointment-actions button.edit {
+            color: var(--warning-color);
+        }
+        
+        .filter-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .filter-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: border-color 0.2s;
+        }
+        
+        .filter-tab.active {
+            border-bottom-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .page-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .page-title h2 {
+            margin: 0;
+            color: var(--accent-color);
+        }
+        
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            color: var(--accent-color);
+        }
+        
+        .date-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .date-selector input {
+            padding: 8px 12px;
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin: 20px auto;
+            text-align: center;
+        }
+        
+        .loading-spinner div {
+            border: 5px solid var(--border-color);
+            border-top: 5px solid var(--accent-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>Military EHR System</h1>
+        </div>
+        <div class="user-info">
+            <span id="username">Loading...</span>
+            <button class="btn" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="page-title">
+            <h2 id="listTitle">Today's Appointments</h2>
+            <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+        
+        <div class="filter-tabs">
+            <div class="filter-tab" data-filter="today">Today</div>
+            <div class="filter-tab" data-filter="upcoming">Upcoming</div>
+            <div class="filter-tab" data-filter="past">Past</div>
+            <div class="filter-tab" data-filter="all">All Appointments</div>
+        </div>
+        
+        <div class="date-selector">
+            <input type="date" id="dateSelector" />
+            <button class="btn" id="dateFilterBtn">Filter by Date</button>
+        </div>
+        
+        <div class="card">
+            <div class="loading-spinner" id="loadingSpinner">
+                <div></div>
+                <p>Loading appointment data...</p>
+            </div>
+            
+            <table id="appointmentsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date & Time</th>
+                        <th>Patient</th>
+                        <th>Provider</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentsList">
+                    <!-- Appointment data will be populated here -->
+                </tbody>
+            </table>
+            
+            <div class="pagination" id="pagination">
+                <!-- Pagination buttons will be added dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentFilter = 'today';
+        let selectedDate = new Date();
+        let currentPage = 1;
+        let totalPages = 1;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('ehrToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set username from token
+            const username = localStorage.getItem('ehrUsername');
+            document.getElementById('username').textContent = username || 'User';
+            
+            // Logout function
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('ehrToken');
+                localStorage.removeItem('ehrUsername');
+                window.location.href = 'login.html';
+            });
+            
+            // Set date selector to today
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('dateSelector').value = formattedDate;
+            
+            // Get filter from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const filterParam = urlParams.get('filter');
+            if (filterParam) {
+                currentFilter = filterParam;
+            }
+            
+            // Update active tab
+            updateFilterTabs();
+            
+            // Set up filter tab clicks
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    currentFilter = this.dataset.filter;
+                    updateFilterTabs();
+                    loadAppointments();
+                });
+            });
+            
+            // Set up date filter button
+            document.getElementById('dateFilterBtn').addEventListener('click', function() {
+                const dateInput = document.getElementById('dateSelector').value;
+                if (dateInput) {
+                    selectedDate = new Date(dateInput);
+                    currentFilter = 'custom';
+                    updateFilterTabs();
+                    loadAppointments();
+                }
+            });
+            
+            // Load appointment data
+            loadAppointments();
+        });
+        
+        function updateFilterTabs() {
+            // Update tab styling
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                if (tab.dataset.filter === currentFilter) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update page title
+            const listTitle = document.getElementById('listTitle');
+            switch (currentFilter) {
+                case 'today':
+                    listTitle.textContent = 'Today\'s Appointments';
+                    break;
+                case 'upcoming':
+                    listTitle.textContent = 'Upcoming Appointments';
+                    break;
+                case 'past':
+                    listTitle.textContent = 'Past Appointments';
+                    break;
+                case 'all':
+                    listTitle.textContent = 'All Appointments';
+                    break;
+                case 'custom':
+                    listTitle.textContent = `Appointments for ${formatDate(selectedDate)}`;
+                    break;
+                default:
+                    listTitle.textContent = 'Appointments';
+            }
+        }
+        
+        function loadAppointments() {
+            // Show loading spinner
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = 'block';
+            
+            // For demo purposes, we're using generated data
+            // In a real app, this would fetch from an API
+            setTimeout(() => {
+                spinner.style.display = 'none';
+                
+                // Generate appointments based on filter
+                let appointments = generateSampleAppointments();
+                
+                // Filter appointments based on current filter
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                switch (currentFilter) {
+                    case 'today':
+                        appointments = appointments.filter(apt => {
+                            const aptDate = new Date(apt.date);
+                            aptDate.setHours(0, 0, 0, 0);
+                            return aptDate.getTime() === today.getTime();
+                        });
+                        break;
+                    case 'upcoming':
+                        appointments = appointments.filter(apt => new Date(apt.date) > today);
+                        break;
+                    case 'past':
+                        appointments = appointments.filter(apt => new Date(apt.date) < today);
+                        break;
+                    case 'custom':
+                        appointments = appointments.filter(apt => {
+                            const aptDate = new Date(apt.date);
+                            aptDate.setHours(0, 0, 0, 0);
+                            return aptDate.getTime() === selectedDate.getTime();
+                        });
+                        break;
+                }
+                
+                renderAppointments(appointments);
+            }, 800); // Simulate network delay
+        }
+        
+        function renderAppointments(appointments) {
+            const tbody = document.getElementById('appointmentsList');
+            tbody.innerHTML = '';
+            
+            if (appointments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No appointments found</td></tr>';
+                return;
+            }
+            
+            // Sort appointments by date (newest first)
+            appointments.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            appointments.forEach(appointment => {
+                const row = document.createElement('tr');
+                
+                // Determine appointment status and badge style
+                let statusClass;
+                switch (appointment.status) {
+                    case 'Scheduled':
+                        statusClass = 'warning';
+                        break;
+                    case 'Completed':
+                        statusClass = 'success';
+                        break;
+                    case 'Canceled':
+                        statusClass = 'danger';
+                        break;
+                    default:
+                        statusClass = '';
+                }
+                
+                row.innerHTML = `
+                    <td>${appointment.id}</td>
+                    <td>${formatDateTime(appointment.date)}</td>
+                    <td>${appointment.patient}</td>
+                    <td>${appointment.provider}</td>
+                    <td>${appointment.reason}</td>
+                    <td><span class="badge badge-${statusClass}">${appointment.status}</span></td>
+                    <td>
+                        <div class="appointment-actions">
+                            <button class="view" onclick="viewAppointment(${appointment.id})">View</button>
+                            <button class="edit" onclick="editAppointment(${appointment.id})">Edit</button>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function generateSampleAppointments() {
+            // This is only used for demo purposes
+            // In a real application, this data would come from an API
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            
+            const lastWeek = new Date(today);
+            lastWeek.setDate(lastWeek.getDate() - 7);
+            
+            return [
+                {
+                    id: 1,
+                    date: today.toISOString(),
+                    patient: 'Calderon, Stacey',
+                    provider: 'Dr. Smith',
+                    reason: 'Annual Physical',
+                    status: 'Scheduled'
+                },
+                {
+                    id: 2,
+                    date: today.toISOString(),
+                    patient: 'Williams, Ian',
+                    provider: 'Dr. Johnson',
+                    reason: 'Follow-up',
+                    status: 'Scheduled'
+                },
+                {
+                    id: 3,
+                    date: tomorrow.toISOString(),
+                    patient: 'Castaneda, Michael',
+                    provider: 'Dr. Smith',
+                    reason: 'Vaccination',
+                    status: 'Scheduled'
+                },
+                {
+                    id: 4,
+                    date: yesterday.toISOString(),
+                    patient: 'Howard, Matthew',
+                    provider: 'Dr. Brown',
+                    reason: 'Illness',
+                    status: 'Completed'
+                },
+                {
+                    id: 5,
+                    date: yesterday.toISOString(),
+                    patient: 'Torres, Sophia',
+                    provider: 'Dr. Johnson',
+                    reason: 'Lab Results',
+                    status: 'Completed'
+                },
+                {
+                    id: 6,
+                    date: nextWeek.toISOString(),
+                    patient: 'Calderon, Stacey',
+                    provider: 'Dr. Brown',
+                    reason: 'Specialist Referral',
+                    status: 'Scheduled'
+                },
+                {
+                    id: 7,
+                    date: lastWeek.toISOString(),
+                    patient: 'Williams, Ian',
+                    provider: 'Dr. Smith',
+                    reason: 'Medication Refill',
+                    status: 'Canceled'
+                },
+                {
+                    id: 8,
+                    date: today.toISOString(),
+                    patient: 'Howard, Matthew',
+                    provider: 'Dr. Johnson',
+                    reason: 'Urgent Care',
+                    status: 'Scheduled'
+                },
+                {
+                    id: 9,
+                    date: tomorrow.toISOString(),
+                    patient: 'Torres, Sophia',
+                    provider: 'Dr. Smith',
+                    reason: 'Consultation',
+                    status: 'Scheduled'
+                },
+                {
+                    id: 10,
+                    date: lastWeek.toISOString(),
+                    patient: 'Castaneda, Michael',
+                    provider: 'Dr. Brown',
+                    reason: 'Follow-up',
+                    status: 'Completed'
+                }
+            ];
+        }
+        
+        function formatDate(dateObj) {
+            return new Date(dateObj).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+        
+        function formatDateTime(dateTimeStr) {
+            const date = new Date(dateTimeStr);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        function viewAppointment(appointmentId) {
+            // In a real app, this would fetch appointment details and show them
+            alert(`View appointment details for ID: ${appointmentId}`);
+        }
+        
+        function editAppointment(appointmentId) {
+            // In a real app, this would navigate to an appointment edit page
+            alert(`Edit appointment with ID: ${appointmentId}`);
+        }
+    </script>
+</body>
+</html> 

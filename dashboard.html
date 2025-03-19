@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR System - Dashboard</title>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --accent-color: #4d8bf0;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+            --hover-color: #2d5ca8;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--secondary-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info span {
+            font-weight: 500;
+        }
+        
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: var(--secondary-bg);
+            padding: 20px 0;
+            border-radius: 8px;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .content {
+            flex-grow: 1;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: background-color 0.2s, border-left-color 0.2s;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(77, 139, 240, 0.1);
+            border-left-color: var(--accent-color);
+        }
+        
+        .menu-item i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .card {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: rgba(77, 139, 240, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: rgba(77, 139, 240, 0.1);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+        
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .search-bar {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .search-bar input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .search-bar button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        
+        .pagination button {
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .pagination button.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+        
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--success-color);
+        }
+        
+        .badge-danger {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .badge-warning {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .patient-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .patient-actions button {
+            padding: 5px 8px;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .patient-actions button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .patient-actions button.view {
+            color: var(--accent-color);
+        }
+        
+        .patient-actions button.edit {
+            color: var(--warning-color);
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin: 20px auto;
+            text-align: center;
+        }
+        
+        .loading-spinner div {
+            border: 5px solid var(--border-color);
+            border-top: 5px solid var(--accent-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>Military EHR System</h1>
+        </div>
+        <div class="user-info">
+            <span id="username">Loading...</span>
+            <button class="btn" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="menu-item active">
+                    <i>📊</i> Dashboard
+                </div>
+                <div class="menu-item">
+                    <i>👥</i> Patients
+                </div>
+                <div class="menu-item">
+                    <i>📅</i> Appointments
+                </div>
+                <div class="menu-item">
+                    <i>📋</i> Medical Records
+                </div>
+                <div class="menu-item">
+                    <i>💊</i> Medications
+                </div>
+                <div class="menu-item">
+                    <i>⚙️</i> Settings
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="stats">
+                    <div class="stat-card" onclick="navigateTo('patients_list.html?filter=all')">
+                        <div class="stat-value" id="totalPatients">--</div>
+                        <div class="stat-label">Total Patients</div>
+                    </div>
+                    <div class="stat-card" onclick="navigateTo('patients_list.html?filter=active')">
+                        <div class="stat-value" id="activePatients">--</div>
+                        <div class="stat-label">Active Patients</div>
+                    </div>
+                    <div class="stat-card" onclick="navigateTo('appointments.html?filter=today')">
+                        <div class="stat-value" id="appointmentsToday">--</div>
+                        <div class="stat-label">Today's Appointments</div>
+                    </div>
+                    <div class="stat-card" onclick="navigateTo('records.html?filter=pending')">
+                        <div class="stat-value" id="pendingRecords">--</div>
+                        <div class="stat-label">Pending Records</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-header">
+                        Recent Patients
+                        <button class="btn" id="refreshBtn">Refresh</button>
+                    </h3>
+                    
+                    <div class="search-bar">
+                        <input type="text" id="searchPatient" placeholder="Search patients...">
+                        <button id="searchBtn">Search</button>
+                    </div>
+                    
+                    <div class="loading-spinner" id="loadingSpinner">
+                        <div></div>
+                        <p>Loading patient data...</p>
+                    </div>
+                    
+                    <table id="patientsTable">
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>Name</th>
+                                <th>DOB</th>
+                                <th>Service</th>
+                                <th>Rank</th>
+                                <th>Blood Type</th>
+                                <th>Contact</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsList">
+                            <!-- Patient data will be populated here -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="pagination" id="pagination">
+                        <button>1</button>
+                        <button>2</button>
+                        <button>3</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('ehrToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set username from token
+            const username = localStorage.getItem('ehrUsername');
+            document.getElementById('username').textContent = username || 'User';
+            
+            // Logout function
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('ehrToken');
+                localStorage.removeItem('ehrUsername');
+                window.location.href = 'login.html';
+            });
+            
+            // Load patient data
+            loadPatientData();
+            
+            // Set up refresh button
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                loadPatientData();
+            });
+            
+            // Set up search button
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                const searchTerm = document.getElementById('searchPatient').value;
+                loadPatientData(searchTerm);
+            });
+            
+            // Load dashboard stats
+            loadDashboardStats();
+        });
+        
+        function loadDashboardStats() {
+            // Get stats from API
+            fetch('http://localhost:8002/api/dashboard-stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const stats = data.stats;
+                        document.getElementById('totalPatients').textContent = stats.totalPatients;
+                        document.getElementById('activePatients').textContent = stats.activePatients;
+                        document.getElementById('appointmentsToday').textContent = stats.appointmentsToday;
+                        document.getElementById('pendingRecords').textContent = stats.pendingRecords;
+                    } else {
+                        console.error('Error loading dashboard stats:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('API error:', error);
+                    // Fallback to simulated data if API fails
+                    document.getElementById('totalPatients').textContent = '100';
+                    document.getElementById('activePatients').textContent = '87';
+                    document.getElementById('appointmentsToday').textContent = '12';
+                    document.getElementById('pendingRecords').textContent = '5';
+                });
+        }
+        
+        function loadPatientData(searchTerm = '') {
+            const token = localStorage.getItem('ehrToken');
+            if (!token) return;
+            
+            // Show loading spinner
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = 'block';
+            
+            // Define API URL with search parameters
+            let apiUrl = `http://localhost:8002/api/patients?limit=10&offset=0`;
+            if (searchTerm) {
+                apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+            }
+            
+            // Fetch patients from API
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Hide spinner
+                    spinner.style.display = 'none';
+                    
+                    if (data.success) {
+                        // Render patients from API
+                        renderPatients(data.patients);
+                    } else {
+                        console.error('Error loading patients:', data.message);
+                        renderPatients([]);  // Render empty state
+                    }
+                })
+                .catch(error => {
+                    console.error('API error:', error);
+                    spinner.style.display = 'none';
+                    
+                    // Fall back to sample data if API fails
+                    renderPatients(generateSamplePatients());
+                });
+        }
+        
+        function renderPatients(patients) {
+            const tbody = document.getElementById('patientsList');
+            tbody.innerHTML = '';
+            
+            if (patients.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No patients found</td></tr>';
+                return;
+            }
+            
+            patients.forEach(patient => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${patient.patient_id}</td>
+                    <td>${patient.last_name}, ${patient.first_name}</td>
+                    <td>${formatDate(patient.date_of_birth)}</td>
+                    <td>${patient.service || 'N/A'}</td>
+                    <td>${patient.rank || 'N/A'}</td>
+                    <td>${patient.blood_type || 'Unknown'}</td>
+                    <td>${patient.contact_number || 'N/A'}</td>
+                    <td>
+                        <div class="patient-actions">
+                            <button class="view" onclick="viewPatient(${patient.patient_id})">View</button>
+                            <button class="edit" onclick="editPatient(${patient.patient_id})">Edit</button>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function generateSamplePatients() {
+            // This is only used as a fallback if the API fails
+            return [
+                { patient_id: 1, first_name: 'Stacey', last_name: 'Calderon', date_of_birth: '1985-07-12', service: 'Army', rank: 'E-5', blood_type: 'A+', contact_number: '555-123-4567' },
+                { patient_id: 2, first_name: 'Ian', last_name: 'Williams', date_of_birth: '1992-03-24', service: 'Navy', rank: 'O-3', blood_type: 'O-', contact_number: '555-987-6543' },
+                { patient_id: 3, first_name: 'Michael', last_name: 'Castaneda', date_of_birth: '1978-11-05', service: 'Air Force', rank: 'E-7', blood_type: 'B+', contact_number: '555-345-6789' },
+                { patient_id: 4, first_name: 'Matthew', last_name: 'Howard', date_of_birth: '1990-09-30', service: 'Marines', rank: 'E-4', blood_type: 'AB+', contact_number: '555-234-5678' },
+                { patient_id: 5, first_name: 'Sophia', last_name: 'Torres', date_of_birth: '1982-05-17', service: 'Coast Guard', rank: 'O-2', blood_type: 'A-', contact_number: '555-876-5432' }
+            ];
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        
+        function viewPatient(patientId) {
+            // Fetch patient details from API
+            fetch(`http://localhost:8002/api/patients/${patientId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // In a real app, this would navigate to a detailed view
+                        // For now, we'll just show an alert with some info
+                        const patient = data.patient;
+                        alert(
+                            `Patient Details:\n` +
+                            `Name: ${patient.first_name} ${patient.last_name}\n` +
+                            `DOB: ${formatDate(patient.date_of_birth)}\n` +
+                            `Gender: ${patient.gender}\n` +
+                            `Service: ${patient.service}\n` +
+                            `Rank: ${patient.rank}\n` +
+                            `Contact: ${patient.contact_number}`
+                        );
+                    } else {
+                        alert(`Error: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('API error:', error);
+                    alert(`Error loading patient details: ${error.message}`);
+                });
+        }
+        
+        function editPatient(patientId) {
+            // Navigate to the edit patient page with the patient ID
+            window.location.href = `edit_patient.html?id=${patientId}`;
+        }
+        
+        function navigateTo(url) {
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html> 

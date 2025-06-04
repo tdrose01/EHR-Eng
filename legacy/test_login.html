@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0f1420;
+            color: #ffffff;
+        }
+        
+        .navbar {
+            background-color: #131b2e;
+            padding: 15px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e2a45;
+        }
+        
+        .navbar .brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4d8bf0;
+        }
+        
+        .navbar .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .navbar .nav-links a {
+            color: #4d8bf0;
+            text-decoration: none;
+        }
+        
+        .navbar .user-info {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .navbar .user-info a {
+            color: #4d8bf0;
+            text-decoration: none;
+        }
+        
+        .container {
+            padding: 30px 80px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #4d8bf0;
+            font-size: 28px;
+        }
+        
+        .add-button {
+            background-color: transparent;
+            border: none;
+            color: #4d8bf0;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .add-button:before {
+            content: "+";
+            margin-right: 8px;
+            font-size: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            color: #4d8bf0;
+            font-weight: normal;
+            border-bottom: 1px solid #1e2a45;
+        }
+        
+        td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #1e2a45;
+        }
+        
+        td a {
+            color: #4d8bf0;
+            text-decoration: none;
+        }
+        
+        /* Original styles for the test login functionality */
+        .card {
+            border: 1px solid #1e2a45;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #131b2e;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #4d8bf0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        input {
+            padding: 8px;
+            margin-bottom: 10px;
+            width: 100%;
+            background-color: #1e2a45;
+            border: 1px solid #2a3a5a;
+            color: white;
+            border-radius: 4px;
+        }
+        
+        pre {
+            background-color: #1e2a45;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            color: #ddd;
+        }
+        
+        label {
+            color: #4d8bf0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="brand">EHR System</div>
+        <div class="nav-links">
+            <a href="#">Dashboard</a>
+            <a href="#">Patients</a>
+            <a href="#">Appointments</a>
+            <a href="#">Medical Records</a>
+        </div>
+        <div class="user-info">
+            <span>Welcome, Admin User 2</span>
+            <a href="#">Logout</a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <div class="header">
+            <h1>Patients</h1>
+            <button class="add-button">Add New Patient</button>
+        </div>
+        
+        <!-- Patients Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Date of Birth</th>
+                    <th>Contact</th>
+                    <th>Insurance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2</td>
+                    <td><a href="patient_detail.html?id=2">Robert Johnson</a></td>
+                    <td>Male</td>
+                    <td>3/8/1990</td>
+                    <td>555-456-7890</td>
+                    <td>Cigna (CI345678)</td>
+                    <td><a href="patient_detail.html?id=2">View</a></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><a href="patient_detail.html?id=3">Thomas Rose</a></td>
+                    <td>Male</td>
+                    <td>5/14/1970</td>
+                    <td>757-560-1019</td>
+                    <td>Cigna (1234551111)</td>
+                    <td><a href="patient_detail.html?id=3">View</a></td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td><a href="patient_detail.html?id=1">Jane Smith</a></td>
+                    <td>Female</td>
+                    <td>8/20/1975</td>
+                    <td>555-987-6543</td>
+                    <td>Aetna (AE789012)</td>
+                    <td><a href="patient_detail.html?id=1">View</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Test Login Section (Hidden by default) -->
+    <div class="container" style="display: none;">
+        <h1>Test Login and Patients</h1>
+        
+        <div class="card">
+            <h2>Login</h2>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" value="admin@example.com">
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" value="admin123">
+            </div>
+            <button onclick="login()">Login</button>
+            <div id="login-result"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Register</h2>
+            <div>
+                <label for="reg-email">Email:</label>
+                <input type="email" id="reg-email" value="newadmin@example.com">
+            </div>
+            <div>
+                <label for="reg-password">Password:</label>
+                <input type="password" id="reg-password" value="admin123">
+            </div>
+            <div>
+                <label for="reg-name">Full Name:</label>
+                <input type="text" id="reg-name" value="New Admin">
+            </div>
+            <button onclick="register()">Register</button>
+            <div id="register-result"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Patients</h2>
+            <button onclick="getPatients()">Get Patients</button>
+            <div id="patients-container">
+                <pre id="patients-result"></pre>
+                <div id="patients-table-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let token = '';
+        
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    token = data.token;
+                    document.getElementById('login-result').innerHTML = `
+                        <p style="color: #4CAF50">Login successful!</p>
+                        <p>Token: ${token.substring(0, 20)}...</p>
+                    `;
+                } else {
+                    document.getElementById('login-result').innerHTML = `
+                        <p style="color: #f44336">Login failed: ${data.detail}</p>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('login-result').innerHTML = `
+                    <p style="color: #f44336">Error: ${error.message}</p>
+                `;
+            }
+        }
+        
+        async function register() {
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const fullName = document.getElementById('reg-name').value;
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email, 
+                        password,
+                        full_name: fullName,
+                        role: 'admin'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('register-result').innerHTML = `
+                        <p style="color: #4CAF50">Registration successful!</p>
+                    `;
+                } else {
+                    document.getElementById('register-result').innerHTML = `
+                        <p style="color: #f44336">Registration failed: ${data.detail}</p>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('register-result').innerHTML = `
+                    <p style="color: #f44336">Error: ${error.message}</p>
+                `;
+            }
+        }
+        
+        async function getPatients() {
+            if (!token) {
+                document.getElementById('patients-result').textContent = 'Please login first';
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/patients', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Display raw JSON
+                    document.getElementById('patients-result').textContent = JSON.stringify(data, null, 2);
+                    
+                    // Create formatted table view
+                    const tableContainer = document.getElementById('patients-table-container');
+                    if (Array.isArray(data)) {
+                        // Create table
+                        let tableHTML = '<h3>Formatted Patient List</h3><table>';
+                        
+                        // Create headers based on first patient's properties
+                        if (data.length > 0) {
+                            tableHTML += '<tr>';
+                            const headers = Object.keys(data[0]);
+                            headers.forEach(header => {
+                                tableHTML += `<th>${formatHeader(header)}</th>`;
+                            });
+                            tableHTML += '</tr>';
+                            
+                            // Add patient rows
+                            data.forEach(patient => {
+                                tableHTML += '<tr>';
+                                headers.forEach(key => {
+                                    tableHTML += `<td>${patient[key] || ''}</td>`;
+                                });
+                                tableHTML += '</tr>';
+                            });
+                        } else {
+                            tableHTML += '<tr><td>No patients found</td></tr>';
+                        }
+                        
+                        tableHTML += '</table>';
+                        tableContainer.innerHTML = tableHTML;
+                    } else {
+                        tableContainer.innerHTML = '<p>Data is not in expected format</p>';
+                    }
+                } else {
+                    document.getElementById('patients-result').textContent = `Error: ${JSON.stringify(data)}`;
+                    document.getElementById('patients-table-container').innerHTML = '';
+                }
+            } catch (error) {
+                document.getElementById('patients-result').textContent = `Error: ${error.message}`;
+                document.getElementById('patients-table-container').innerHTML = '';
+            }
+        }
+        
+        // Helper function to format header names
+        function formatHeader(header) {
+            return header
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, char => char.toUpperCase());
+        }
+    </script>
+</body>
+</html> 

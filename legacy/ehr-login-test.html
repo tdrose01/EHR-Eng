@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR System Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0f1420;
+            color: #ffffff;
+        }
+        
+        .navbar {
+            background-color: #131b2e;
+            padding: 15px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e2a45;
+        }
+        
+        .navbar .brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4d8bf0;
+        }
+        
+        .container {
+            padding: 30px 80px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            border: 1px solid #1e2a45;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #131b2e;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #4d8bf0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        input {
+            padding: 8px;
+            margin-bottom: 10px;
+            width: 100%;
+            background-color: #1e2a45;
+            border: 1px solid #2a3a5a;
+            color: white;
+            border-radius: 4px;
+        }
+        
+        pre {
+            background-color: #1e2a45;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            color: #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        label {
+            color: #4d8bf0;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .result-success {
+            color: #4CAF50;
+            margin-top: 10px;
+        }
+        
+        .result-error {
+            color: #f44336;
+            margin-top: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            text-align: left;
+            padding: 10px;
+            color: #4d8bf0;
+            font-weight: normal;
+            border-bottom: 1px solid #1e2a45;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #1e2a45;
+        }
+        
+        #requestLog {
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #1e2a45;
+            border-radius: 4px;
+        }
+        
+        .log-time {
+            color: #aaa;
+            font-size: 0.8em;
+        }
+        
+        .log-request {
+            color: #4d8bf0;
+        }
+        
+        .log-response {
+            color: #6abf69;
+        }
+        
+        .log-error {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="brand">EHR System Login Test</div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <div class="card">
+            <h2>Login</h2>
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" value="admin">
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" value="admin123">
+            </div>
+            <button onclick="login()">Login</button>
+            <div id="login-result"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Register</h2>
+            <div>
+                <label for="reg-username">Username:</label>
+                <input type="text" id="reg-username" value="newuser">
+            </div>
+            <div>
+                <label for="reg-password">Password:</label>
+                <input type="password" id="reg-password" value="password123">
+            </div>
+            <div>
+                <label for="reg-email">Email:</label>
+                <input type="email" id="reg-email" value="newuser@example.com">
+            </div>
+            <div>
+                <label for="reg-name">Full Name:</label>
+                <input type="text" id="reg-name" value="New User">
+            </div>
+            <button onclick="register()">Register</button>
+            <div id="register-result"></div>
+        </div>
+        
+        <div class="card">
+            <h2>User Profile</h2>
+            <button onclick="getUserProfile()">Get User Profile</button>
+            <pre id="profile-result"></pre>
+        </div>
+        
+        <div class="card">
+            <h2>Login History</h2>
+            <button onclick="getLoginHistory()">Get Login History</button>
+            <pre id="history-result"></pre>
+            <div id="history-table"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Request/Response Log</h2>
+            <button onclick="clearLog()">Clear Log</button>
+            <div id="requestLog"></div>
+        </div>
+    </div>
+    
+    <script>
+        let token = '';
+        let requestCounter = 0;
+        
+        function addToLog(type, message, data = null) {
+            const logContainer = document.getElementById('requestLog');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const logId = `req-${++requestCounter}`;
+            
+            let logContent = `<div class="log-time">${timestamp} [${logId}]</div>`;
+            logContent += `<div class="log-${type}">${message}</div>`;
+            
+            if (data) {
+                if (typeof data === 'object') {
+                    logContent += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    logContent += `<pre>${data}</pre>`;
+                }
+            }
+            
+            logEntry.innerHTML = logContent;
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+            
+            return logId;
+        }
+        
+        function clearLog() {
+            document.getElementById('requestLog').innerHTML = '';
+            addToLog('request', 'Log cleared');
+        }
+        
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const requestData = { username, password };
+            const logId = addToLog('request', 'POST /api/login', requestData);
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                addToLog('response', `Response for ${logId}: ${response.status} ${response.statusText}`, data);
+                
+                if (response.ok) {
+                    token = data.access_token;
+                    document.getElementById('login-result').innerHTML = `
+                        <p class="result-success">Login successful!</p>
+                        <p>Welcome ${data.user.name}</p>
+                        <p>Token: ${token}</p>
+                    `;
+                } else {
+                    document.getElementById('login-result').innerHTML = `
+                        <p class="result-error">Login failed: ${data.error || data.detail || 'Unknown error'}</p>
+                    `;
+                }
+            } catch (error) {
+                addToLog('error', `Error for ${logId}: ${error.message}`);
+                document.getElementById('login-result').innerHTML = `
+                    <p class="result-error">Error: ${error.message}</p>
+                `;
+            }
+        }
+        
+        async function register() {
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const email = document.getElementById('reg-email').value;
+            const name = document.getElementById('reg-name').value;
+            
+            const requestData = { username, password, email, name };
+            const logId = addToLog('request', 'POST /api/register', requestData);
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                addToLog('response', `Response for ${logId}: ${response.status} ${response.statusText}`, data);
+                
+                if (response.ok) {
+                    document.getElementById('register-result').innerHTML = `
+                        <p class="result-success">Registration successful!</p>
+                        <p>User ID: ${data.user?.id || 'N/A'}</p>
+                    `;
+                } else {
+                    document.getElementById('register-result').innerHTML = `
+                        <p class="result-error">Registration failed: ${data.error || data.detail || 'Unknown error'}</p>
+                    `;
+                }
+            } catch (error) {
+                addToLog('error', `Error for ${logId}: ${error.message}`);
+                document.getElementById('register-result').innerHTML = `
+                    <p class="result-error">Error: ${error.message}</p>
+                `;
+            }
+        }
+        
+        async function getUserProfile() {
+            if (!token) {
+                document.getElementById('profile-result').textContent = 'Please login first';
+                return;
+            }
+            
+            const logId = addToLog('request', 'GET /api/user/profile', { Authorization: `Bearer ${token}` });
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/user/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                addToLog('response', `Response for ${logId}: ${response.status} ${response.statusText}`, data);
+                
+                if (response.ok) {
+                    document.getElementById('profile-result').textContent = JSON.stringify(data, null, 2);
+                } else {
+                    document.getElementById('profile-result').textContent = `Error: ${JSON.stringify(data)}`;
+                }
+            } catch (error) {
+                addToLog('error', `Error for ${logId}: ${error.message}`);
+                document.getElementById('profile-result').textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function getLoginHistory() {
+            if (!token) {
+                document.getElementById('history-result').textContent = 'Please login first';
+                return;
+            }
+            
+            const logId = addToLog('request', 'GET /api/user/login-history', { Authorization: `Bearer ${token}` });
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/user/login-history', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                addToLog('response', `Response for ${logId}: ${response.status} ${response.statusText}`, data);
+                
+                if (response.ok) {
+                    // Display raw JSON
+                    document.getElementById('history-result').textContent = JSON.stringify(data, null, 2);
+                    
+                    // Create formatted table
+                    const tableContainer = document.getElementById('history-table');
+                    if (Array.isArray(data) && data.length > 0) {
+                        let tableHTML = '<table>';
+                        
+                        // Headers
+                        tableHTML += '<tr>';
+                        Object.keys(data[0]).forEach(key => {
+                            tableHTML += `<th>${formatHeader(key)}</th>`;
+                        });
+                        tableHTML += '</tr>';
+                        
+                        // Rows
+                        data.forEach(item => {
+                            tableHTML += '<tr>';
+                            Object.keys(item).forEach(key => {
+                                let value = item[key];
+                                // Format boolean values
+                                if (typeof value === 'boolean') {
+                                    value = value ? '✓' : '✗';
+                                }
+                                tableHTML += `<td>${value}</td>`;
+                            });
+                            tableHTML += '</tr>';
+                        });
+                        
+                        tableHTML += '</table>';
+                        tableContainer.innerHTML = tableHTML;
+                    } else {
+                        tableContainer.innerHTML = '<p>No login history found</p>';
+                    }
+                } else {
+                    document.getElementById('history-result').textContent = `Error: ${JSON.stringify(data)}`;
+                    document.getElementById('history-table').innerHTML = '';
+                }
+            } catch (error) {
+                addToLog('error', `Error for ${logId}: ${error.message}`);
+                document.getElementById('history-result').textContent = `Error: ${error.message}`;
+                document.getElementById('history-table').innerHTML = '';
+            }
+        }
+        
+        // Helper function to format header names
+        function formatHeader(header) {
+            return header
+                .split(/(?=[A-Z])/).join(' ')  // Split camelCase
+                .replace(/_/g, ' ')            // Replace underscores with spaces
+                .replace(/\b\w/g, char => char.toUpperCase());  // Capitalize first letter of each word
+        }
+        
+        // Add initial log entry
+        addToLog('request', 'Page loaded');
+    </script>
+</body>
+</html> 

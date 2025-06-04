@@ -1,0 +1,18 @@
+{
+  "name": "ehr-system",
+  "version": "1.0.0",
+  "description": "EHR System",
+  "main": "server.js",
+  "scripts": {
+    "test:minimal": "npx playwright test tests/minimal-test.js",
+    "test:standalone": "npx playwright test tests/standalone-test.js",
+    "test:vaccine": "npx playwright test tests/vaccine-test.js",
+    "test:patients": "npx playwright test tests/patients-test.js",
+    "test:e2e": "npx playwright test tests/e2e-flow.js",
+    "test:records": "npx playwright test tests/records-test.cjs",
+    "test:all": "npx playwright test tests/"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1"
+  }
+}

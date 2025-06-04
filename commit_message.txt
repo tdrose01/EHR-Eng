@@ -1,0 +1,20 @@
+[Cursor] Implement PatientList component with Cypress tests
+
+Added comprehensive patient list functionality including:
+- Responsive PatientTable component with sorting, filtering, and pagination
+- Search functionality with debounced input
+- Service filter dropdown
+- Export selected patients as JSON
+- Action buttons (View, Edit, Delete) with confirmation
+- End-to-end tests with Cypress
+- Component tests for PatientTable and PatientList
+- Loading and error states with fallback data
+- Updated documentation in Lessons.md
+
+Note: Cypress tests are passing for component tests. End-to-end tests 
+require a running server on port 8086 to function.
+
+Next steps:
+- Fix any remaining end-to-end test issues
+- Implement patient detail view
+- Add form validation for patient creation/editing 

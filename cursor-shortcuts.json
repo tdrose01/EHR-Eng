@@ -1,0 +1,8 @@
+{
+  "shortcuts": {
+    "/server": {
+      "command": "powershell -File c:\\tom\\ehr_manager.ps1",
+      "description": "Start the EHR manager server"
+    }
+  }
+} 

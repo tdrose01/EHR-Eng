@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccine API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .endpoint-card {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+        }
+        .endpoint-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .test-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background-color: #2980b9;
+        }
+        .response-container {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        pre {
+            white-space: pre-wrap;
+            margin: 0;
+        }
+        .status {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vaccine API Test Dashboard</h1>
+        <p>This page tests the vaccine API endpoints running at <span id="apiUrl">http://localhost:8004</span></p>
+        
+        <div class="endpoint-card">
+            <div class="endpoint-title">/api/vaccines/test</div>
+            <p>Basic health check endpoint that doesn't require database access</p>
+            <button class="test-button" onclick="testEndpoint('/api/vaccines/test', 'testResponse')">Test Endpoint</button>
+            <div id="testResponse" class="response-container" style="display: none;">
+                <div class="status"></div>
+                <pre class="content"></pre>
+            </div>
+        </div>
+
+        <div class="endpoint-card">
+            <div class="endpoint-title">/api/vaccines/simple</div>
+            <p>Returns data from the test_vaccines table</p>
+            <button class="test-button" onclick="testEndpoint('/api/vaccines/simple', 'simpleResponse')">Test Endpoint</button>
+            <div id="simpleResponse" class="response-container" style="display: none;">
+                <div class="status"></div>
+                <pre class="content"></pre>
+            </div>
+        </div>
+
+        <div class="endpoint-card">
+            <div class="endpoint-title">Server Status</div>
+            <p>Overall server and database status</p>
+            <button class="test-button" onclick="checkServerStatus()">Check Status</button>
+            <div id="serverStatus" class="response-container" style="display: none;">
+                <div class="status"></div>
+                <pre class="content"></pre>
+            </div>
+        </div>
+
+        <p class="timestamp">Last updated: <span id="lastUpdated"></span></p>
+    </div>
+
+    <script>
+        // Update timestamp
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+
+        // Base API URL
+        const apiUrl = 'http://localhost:8004';
+        
+        // Function to test an endpoint
+        async function testEndpoint(endpoint, responseElementId) {
+            const responseContainer = document.getElementById(responseElementId);
+            const statusElement = responseContainer.querySelector('.status');
+            const contentElement = responseContainer.querySelector('.content');
+            
+            responseContainer.style.display = 'block';
+            statusElement.textContent = 'Testing...';
+            statusElement.className = 'status';
+            contentElement.textContent = '';
+            
+            try {
+                const response = await fetch(apiUrl + endpoint);
+                const statusCode = response.status;
+                
+                let responseData;
+                try {
+                    responseData = await response.json();
+                } catch (e) {
+                    responseData = await response.text();
+                }
+                
+                if (statusCode >= 200 && statusCode < 300) {
+                    statusElement.textContent = `Success (${statusCode})`;
+                    statusElement.className = 'status success';
+                } else {
+                    statusElement.textContent = `Error (${statusCode})`;
+                    statusElement.className = 'status error';
+                }
+                
+                contentElement.textContent = typeof responseData === 'object' 
+                    ? JSON.stringify(responseData, null, 2) 
+                    : responseData;
+                
+            } catch (error) {
+                statusElement.textContent = 'Connection Error';
+                statusElement.className = 'status error';
+                contentElement.textContent = error.message;
+            }
+        }
+        
+        // Function to check overall server status
+        async function checkServerStatus() {
+            const responseContainer = document.getElementById('serverStatus');
+            const statusElement = responseContainer.querySelector('.status');
+            const contentElement = responseContainer.querySelector('.content');
+            
+            responseContainer.style.display = 'block';
+            statusElement.textContent = 'Checking...';
+            statusElement.className = 'status';
+            contentElement.textContent = '';
+            
+            try {
+                const testResponse = await fetch(apiUrl + '/api/vaccines/test');
+                const simpleResponse = await fetch(apiUrl + '/api/vaccines/simple');
+                
+                const statusSummary = {
+                    server: testResponse.ok ? 'Online' : 'Error',
+                    database: simpleResponse.ok ? 'Connected' : 'Error',
+                    testEndpoint: {
+                        status: testResponse.status,
+                        ok: testResponse.ok
+                    },
+                    simpleEndpoint: {
+                        status: simpleResponse.status,
+                        ok: simpleResponse.ok
+                    },
+                    timestamp: new Date().toISOString()
+                };
+                
+                if (testResponse.ok && simpleResponse.ok) {
+                    statusElement.textContent = 'All Systems Operational';
+                    statusElement.className = 'status success';
+                } else if (testResponse.ok) {
+                    statusElement.textContent = 'Server Online, Database Error';
+                    statusElement.className = 'status error';
+                } else {
+                    statusElement.textContent = 'Server Error';
+                    statusElement.className = 'status error';
+                }
+                
+                contentElement.textContent = JSON.stringify(statusSummary, null, 2);
+                
+            } catch (error) {
+                statusElement.textContent = 'Connection Error';
+                statusElement.className = 'status error';
+                contentElement.textContent = error.message;
+            }
+        }
+    </script>
+</body>
+</html> 

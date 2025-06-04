@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vaccine API Automation Test Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .success { color: green; }
+        .failure { color: red; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .result-box { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .timestamp { color: #666; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vaccine API Automation Test Report</h1>
+        <p class="timestamp">Generated on: 2025-03-25 18:38:04</p>
+        
+        <div class="result-box">
+            <h2>Test Summary</h2>
+            <p>
+                <span class="success">
+                    + API Connection: 
+                    Successful
+                </span>
+            </p>
+            <p>
+                <span class="failure">
+                    X API Endpoints: 
+                    Some Failed
+                </span>
+            </p>
+            <h3>Overall Result:</h3>
+            <p>
+                <span class="failure">
+                    <strong>FAILED</strong>
+                </span>
+            </p>
+        </div>
+        
+        <div class="result-box">
+            <h2>Test Details</h2>
+            <p>API Base URL: http://localhost:8004</p>
+            <p>Endpoints Tested:</p>
+            <ul>
+                <li>/api/vaccines/test</li><li>/api/vaccines/simple</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

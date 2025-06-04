@@ -1,0 +1,22 @@
+EHR VUE APPLICATION ACCESS INSTRUCTIONS
+
+1. The application has been fixed and should now be running.
+
+2. To access the application:
+   - Open your web browser (Chrome, Firefox, or Edge recommended)
+   - Go to http://localhost:8081
+
+3. If the application doesn't load:
+   - Run the fix-ehr-app.bat script again
+   - Run the start-backend.bat script to ensure the backend is running
+
+4. Default Login Credentials:
+   - Username: admin
+   - Password: password
+
+5. If you still encounter issues:
+   - Check that ports 8000, 8004, and 8081 are not being used by other applications
+   - Restart your computer and run the scripts again
+   - Make sure PostgreSQL is running and properly configured
+
+The application should now work correctly. Both the frontend and backend servers have been started. 

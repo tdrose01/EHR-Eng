@@ -1,0 +1,13 @@
+{
+  "name": "cvx-browser-automation-tests",
+  "version": "1.0.0",
+  "description": "Browser automation tests for CVX code functionality",
+  "scripts": {
+    "test": "npx playwright test test_cvx_browser_automation.js --config playwright.cvx.config.js",
+    "test:headed": "npx playwright test test_cvx_browser_automation.js --config playwright.cvx.config.js --headed",
+    "report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+} 

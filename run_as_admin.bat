@@ -1,0 +1,3 @@
+@echo off
+echo Starting EHR Manager with administrative privileges...
+powershell -Command "Start-Process powershell.exe -ArgumentList '-File \"%~dp0ehr_manager.ps1\" %*' -Verb RunAs" 

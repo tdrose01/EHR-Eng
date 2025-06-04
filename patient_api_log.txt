@@ -1,0 +1,8 @@
+Loading environment variables from: C:\tom\backend\.env
+WARNING:  You must pass the application as an import string to enable 'reload' or 'workers'.
+Database configuration loaded:
+Host: localhost
+Port: 5432
+Database: ehr_db
+User: postgres
+Password: [REDACTED]

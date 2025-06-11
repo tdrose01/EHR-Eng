@@ -258,6 +258,79 @@ def get_dashboard_stats():
         cursor.close()
         conn.close()
 
+@app.route('/api/patients', methods=['POST'])
+def add_patient():
+    """API endpoint to create a new patient"""
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"success": False, "message": "No data provided"}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"success": False, "message": "Database connection failed"}), 500
+
+    cursor = conn.cursor()
+
+    try:
+        allowed_fields = [
+            "first_name",
+            "last_name",
+            "date_of_birth",
+            "gender",
+            "contact_number",
+            "email",
+            "address",
+            "emergency_contact",
+            "emergency_contact_number",
+            "blood_type",
+            "rank",
+            "service",
+            "fmpc",
+            "allergies",
+            "medical_conditions"
+        ]
+
+        fields = []
+        placeholders = []
+        params = []
+
+        for field in allowed_fields:
+            if field in data:
+                fields.append(field)
+                placeholders.append("%s")
+                params.append(data[field])
+
+        # Add timestamps
+        fields.extend(["created_at", "updated_at"])
+        placeholders.extend(["%s", "%s"])
+        now = datetime.datetime.now()
+        params.extend([now, now])
+
+        query = f"""
+            INSERT INTO patients ({', '.join(fields)})
+            VALUES ({', '.join(placeholders)})
+            RETURNING patient_id
+        """
+
+        cursor.execute(query, params)
+        new_id = cursor.fetchone()[0]
+        conn.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Patient added successfully",
+            "patient_id": new_id
+        })
+
+    except Exception as e:
+        conn.rollback()
+        print(f"Error adding patient: {e}")
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.route('/api/patients/<int:patient_id>', methods=['PUT'])
 def update_patient(patient_id):
     """API endpoint to update a patient's data"""

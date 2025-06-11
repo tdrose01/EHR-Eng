@@ -361,7 +361,10 @@
                 <div class="card">
                     <h3 class="card-header">
                         Recent Patients
-                        <button class="btn" id="refreshBtn">Refresh</button>
+                        <div>
+                            <button class="btn" id="addPatientBtn">Add Patient</button>
+                            <button class="btn" id="refreshBtn">Refresh</button>
+                        </div>
                     </h3>
                     
                     <div class="search-bar">
@@ -428,6 +431,11 @@
             // Set up refresh button
             document.getElementById('refreshBtn').addEventListener('click', function() {
                 loadPatientData();
+            });
+
+            // Navigate to add patient page
+            document.getElementById('addPatientBtn').addEventListener('click', function() {
+                window.location.href = 'add_patient.html';
             });
             
             // Set up search button

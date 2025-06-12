@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR Login - Vue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div id="app" class="bg-white p-6 rounded shadow-md w-80">
+        <h1 class="text-xl font-semibold mb-4 text-center">Login</h1>
+        <input v-model="username" type="text" placeholder="Username" class="mb-2 p-2 border w-full rounded" />
+        <input v-model="password" type="password" placeholder="Password" class="mb-2 p-2 border w-full rounded" />
+        <p v-if="statusMessage" :class="messageClass" class="text-center mb-2">{{ statusMessage }}</p>
+        <button @click="login" :disabled="loading" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
+            {{ loading ? 'Logging in...' : 'Login' }}
+        </button>
+    </div>
+
+    <script>
+    const { createApp } = Vue;
+    createApp({
+        data() {
+            return {
+                username: '',
+                password: '',
+                loading: false,
+                statusMessage: '',
+                messageType: ''
+            };
+        },
+        computed: {
+            messageClass() {
+                return this.messageType === 'error' ? 'text-red-600' : 'text-green-600';
+            }
+        },
+        methods: {
+            async login() {
+                this.loading = true;
+                this.statusMessage = '';
+                this.messageType = '';
+                try {
+                    const response = await fetch('http://localhost:8001/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username: this.username, password: this.password })
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Invalid username or password');
+                    }
+                    localStorage.setItem('ehrToken', data.token);
+                    localStorage.setItem('ehrUsername', this.username);
+                    this.statusMessage = 'Login successful!';
+                    this.messageType = 'success';
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } catch (err) {
+                    this.statusMessage = err.message;
+                    this.messageType = 'error';
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }
+    }).mount('#app');
+    </script>
+</body>
+</html>

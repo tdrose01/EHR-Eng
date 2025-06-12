@@ -86,7 +86,7 @@ Alternatively, run `python start_servers.py` to launch the HTTP, authentication,
 
 Test users:
 - Admin: `admin` / `adminpass123`
-- Test user: `ehrtest` / `testpassword`
+- Test user: `ehrtest` / `testpassword123`
 
 ## Contributors
 

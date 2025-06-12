@@ -79,9 +79,17 @@ Alternatively, run `python start_servers.py` to launch the HTTP, authentication,
 ## Usage
 
 1. Access the application at `http://localhost:8080/login.html`
-2. Alternatively, try the Vue.js version at `http://localhost:8080/login_vue.html`
-3. Login with provided credentials
-4. Navigate through the dashboard to access patients, appointments, and records
+2. Alternatively, try the Vue.js versions at `http://localhost:8080/login_vue.html` or `login.vue` if using a Vue build setup
+3. A Vue-based dashboard is available at `http://localhost:8080/dashboard_vue.html` or `Dashboard.vue`
+4. Additional Vue pages are available:
+   - Patients list: `patients_list_vue.html` or `PatientsList.vue`
+   - Add patient: `add_patient_vue.html` or `AddPatient.vue`
+   - Edit patient: `edit_patient_vue.html` or `EditPatient.vue`
+   - Appointments: `appointments_vue.html` or `Appointments.vue`
+   - Records: `records_vue.html` or `Records.vue`
+   - Patient details: `patient_detail_vue.html` or `PatientDetail.vue`
+5. Login with provided credentials
+6. Navigate through the dashboard to access patients, appointments, and records
 
 ## Testing
 

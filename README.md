@@ -54,6 +54,9 @@ DB_HOST=localhost
 DB_PORT=5432
 ```
 
+Optionally, set `ENV_PATH` to point to a custom environment file before running
+any scripts. If not set, `.env` in the project root is used.
+
 ### Starting the Servers
 
 1. Start the HTTP server: `python -m http.server 8080`

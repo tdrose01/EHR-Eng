@@ -58,6 +58,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
         }
 
         #changePasswordContainer {
@@ -82,6 +83,33 @@
         
         .user-info span {
             font-weight: 500;
+            cursor: pointer;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 5px);
+            right: 0;
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: none;
+            flex-direction: column;
+            min-width: 150px;
+            z-index: 100;
+        }
+
+        .user-dropdown button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            padding: 8px 15px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .user-dropdown button:hover {
+            background-color: rgba(77, 139, 240, 0.1);
         }
         
         .btn {
@@ -330,8 +358,11 @@
             <h1>Top EHR System</h1>
         </div>
         <div class="user-info">
-            <span id="username">Loading...</span>
-            <button class="btn" id="logoutBtn">Logout</button>
+            <span id="username" class="username">Loading...</span>
+            <div class="user-dropdown" id="userDropdown">
+                <button id="openChangePassword">Change Password</button>
+                <button id="logoutBtn">Logout</button>
+            </div>
         </div>
         <div id="changePasswordContainer">
             <input type="password" id="oldPassword" placeholder="Current password">
@@ -339,7 +370,6 @@
             <button class="btn" id="changePasswordBtn">Update Password</button>
             <div id="changePasswordStatus"></div>
         </div>
-        <button class="btn" id="toggleChangePassword" style="margin-top:10px;">Change Password</button>
     </header>
     
     <div class="container">
@@ -445,10 +475,23 @@
             const username = localStorage.getItem('ehrUsername');
             document.getElementById('username').textContent = username || 'User';
 
-            // Toggle change password form
-            const toggleBtn = document.getElementById('toggleChangePassword');
+            // Dropdown menu logic
+            const usernameEl = document.getElementById('username');
+            const dropdown = document.getElementById('userDropdown');
             const formContainer = document.getElementById('changePasswordContainer');
-            toggleBtn.addEventListener('click', function() {
+
+            usernameEl.addEventListener('click', function(e) {
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!document.querySelector('.user-info').contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            document.getElementById('openChangePassword').addEventListener('click', function() {
+                dropdown.style.display = 'none';
                 formContainer.style.display = formContainer.style.display === 'flex' ? 'none' : 'flex';
             });
 

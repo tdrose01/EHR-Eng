@@ -134,5 +134,55 @@ def login():
         cursor.close()
         conn.close()
 
+@app.route('/api/change-password', methods=['POST'])
+def change_password():
+    """Allow a user to change their password"""
+    data = request.json
+
+    required_fields = {'username', 'old_password', 'new_password'}
+    if not data or not required_fields.issubset(data):
+        return jsonify({"success": False, "message": "Username, old password and new password are required"}), 400
+
+    username = data['username']
+    old_password = data['old_password']
+    new_password = data['new_password']
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"success": False, "message": "Database connection failed"}), 500
+
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            "SELECT id, hashed_password FROM users WHERE username = %s",
+            (username,)
+        )
+        user = cursor.fetchone()
+
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+
+        user_id, current_hash = user
+        if hash_password(old_password) != current_hash:
+            return jsonify({"success": False, "message": "Current password is incorrect"}), 401
+
+        new_hash = hash_password(new_password)
+        cursor.execute(
+            "UPDATE users SET hashed_password = %s WHERE id = %s",
+            (new_hash, user_id)
+        )
+        conn.commit()
+
+        return jsonify({"success": True, "message": "Password updated"})
+
+    except Exception as e:
+        print(f"Change password error: {e}")
+        conn.rollback()
+        return jsonify({"success": False, "message": "Server error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8001, debug=True) 

@@ -59,6 +59,26 @@
             align-items: center;
             gap: 15px;
         }
+
+        #changePasswordContainer {
+            margin-top: 10px;
+            background-color: var(--secondary-bg);
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 300px;
+        }
+
+        #changePasswordContainer input {
+            padding: 8px;
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 4px;
+        }
         
         .user-info span {
             font-weight: 500;
@@ -313,6 +333,13 @@
             <span id="username">Loading...</span>
             <button class="btn" id="logoutBtn">Logout</button>
         </div>
+        <div id="changePasswordContainer">
+            <input type="password" id="oldPassword" placeholder="Current password">
+            <input type="password" id="newPassword" placeholder="New password">
+            <button class="btn" id="changePasswordBtn">Update Password</button>
+            <div id="changePasswordStatus"></div>
+        </div>
+        <button class="btn" id="toggleChangePassword" style="margin-top:10px;">Change Password</button>
     </header>
     
     <div class="container">
@@ -417,6 +444,42 @@
             // Set username from token
             const username = localStorage.getItem('ehrUsername');
             document.getElementById('username').textContent = username || 'User';
+
+            // Toggle change password form
+            const toggleBtn = document.getElementById('toggleChangePassword');
+            const formContainer = document.getElementById('changePasswordContainer');
+            toggleBtn.addEventListener('click', function() {
+                formContainer.style.display = formContainer.style.display === 'flex' ? 'none' : 'flex';
+            });
+
+            // Handle password update
+            document.getElementById('changePasswordBtn').addEventListener('click', function() {
+                const oldPass = document.getElementById('oldPassword').value;
+                const newPass = document.getElementById('newPassword').value;
+                const statusDiv = document.getElementById('changePasswordStatus');
+
+                fetch('http://localhost:8001/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, old_password: oldPass, new_password: newPass })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        statusDiv.textContent = 'Password updated successfully.';
+                        statusDiv.style.color = '#4caf50';
+                        document.getElementById('oldPassword').value = '';
+                        document.getElementById('newPassword').value = '';
+                    } else {
+                        statusDiv.textContent = data.message;
+                        statusDiv.style.color = '#f44336';
+                    }
+                })
+                .catch(err => {
+                    statusDiv.textContent = 'Error updating password';
+                    statusDiv.style.color = '#f44336';
+                });
+            });
             
             // Logout function
             document.getElementById('logoutBtn').addEventListener('click', function() {

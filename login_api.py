@@ -78,12 +78,12 @@ def login():
             return jsonify({"success": False, "message": "Invalid username or password"}), 401
         
         user_id, db_username, hashed_password = user_data
-        
+
         # Hash the provided password
-        password_hash = hash_password(password)
-        
+        hashed_input = hash_password(password)
+
         # Check if password hashes match
-        if password_hash != hashed_password:
+        if hashed_input != hashed_password:
             # Record failed login attempt
             try:
                 cursor.execute(

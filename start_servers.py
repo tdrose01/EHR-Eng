@@ -13,6 +13,7 @@ init()
 # Server ports
 API_PORT = 8001  # Login API
 PATIENT_API_PORT = 8002  # Patient API
+APPOINTMENTS_API_PORT = 8003  # Appointments API
 HTTP_PORT = 8080  # HTML/assets server
 
 # Track subprocess objects
@@ -116,6 +117,42 @@ def start_patient_api_server():
         print_error(f"Error starting patient API server: {e}")
         return False
 
+def start_appointments_api_server():
+    """Start the Appointments API server."""
+    print_header("Starting Appointments API Server")
+
+    try:
+        print_info(f"Starting appointments API server on port {APPOINTMENTS_API_PORT}...")
+
+        python_exe = sys.executable
+
+        api_process = subprocess.Popen(
+            [python_exe, "appointments_api.py"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        processes.append(api_process)
+
+        time.sleep(2)
+
+        if api_process.poll() is None:
+            print_success(f"Appointments API server running at http://localhost:{APPOINTMENTS_API_PORT}")
+            return True
+        else:
+            stdout, stderr = api_process.communicate()
+            print_error("Appointments API server failed to start:")
+            if stdout:
+                print_error(f"Output: {stdout}")
+            if stderr:
+                print_error(f"Error: {stderr}")
+            return False
+
+    except Exception as e:
+        print_error(f"Error starting appointments API server: {e}")
+        return False
+
 def start_http_server():
     """Start the HTTP file server."""
     print_header("Starting HTTP Server")
@@ -198,11 +235,14 @@ def main():
     
     # Start Patient API server
     patient_api_success = start_patient_api_server()
+
+    # Start Appointments API server
+    appointments_api_success = start_appointments_api_server()
     
     # Start HTTP server
     http_success = start_http_server()
     
-    if login_api_success and patient_api_success and http_success:
+    if login_api_success and patient_api_success and appointments_api_success and http_success:
         print_success("All servers started successfully!")
         
         # Open login page

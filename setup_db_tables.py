@@ -139,6 +139,18 @@ def create_tables(conn):
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
         """
+        """
+        CREATE TABLE IF NOT EXISTS appointments (
+            id SERIAL PRIMARY KEY,
+            patient_id INTEGER REFERENCES patients(id),
+            provider_id INTEGER REFERENCES users(id),
+            appointment_time TIMESTAMP NOT NULL,
+            reason TEXT,
+            status VARCHAR(20) NOT NULL DEFAULT 'Scheduled',
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
     ]
     
     try:

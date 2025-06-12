@@ -424,47 +424,55 @@
         }
         
         function loadAppointments() {
-            // Show loading spinner
             const spinner = document.getElementById('loadingSpinner');
             spinner.style.display = 'block';
-            
-            // For demo purposes, we're using generated data
-            // In a real app, this would fetch from an API
-            setTimeout(() => {
-                spinner.style.display = 'none';
-                
-                // Generate appointments based on filter
-                let appointments = generateSampleAppointments();
-                
+
+            fetch('http://localhost:8003/api/appointments')
+                .then(response => response.json())
+                .then(data => {
+                    spinner.style.display = 'none';
+
+                    if (data.success) {
+                        let appointments = data.appointments;
+
                 // Filter appointments based on current filter
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                
+
                 switch (currentFilter) {
                     case 'today':
                         appointments = appointments.filter(apt => {
-                            const aptDate = new Date(apt.date);
+                            const aptDate = new Date(apt.appointment_time);
                             aptDate.setHours(0, 0, 0, 0);
                             return aptDate.getTime() === today.getTime();
                         });
                         break;
                     case 'upcoming':
-                        appointments = appointments.filter(apt => new Date(apt.date) > today);
+                        appointments = appointments.filter(apt => new Date(apt.appointment_time) > today);
                         break;
                     case 'past':
-                        appointments = appointments.filter(apt => new Date(apt.date) < today);
+                        appointments = appointments.filter(apt => new Date(apt.appointment_time) < today);
                         break;
                     case 'custom':
                         appointments = appointments.filter(apt => {
-                            const aptDate = new Date(apt.date);
+                            const aptDate = new Date(apt.appointment_time);
                             aptDate.setHours(0, 0, 0, 0);
                             return aptDate.getTime() === selectedDate.getTime();
                         });
                         break;
                 }
-                
+
                 renderAppointments(appointments);
-            }, 800); // Simulate network delay
+                    } else {
+                        console.error('Error loading appointments:', data.message);
+                        renderAppointments([]);
+                    }
+                })
+                .catch(error => {
+                    console.error('API error:', error);
+                    spinner.style.display = 'none';
+                    renderAppointments([]);
+                });
         }
         
         function renderAppointments(appointments) {
@@ -477,7 +485,7 @@
             }
             
             // Sort appointments by date (newest first)
-            appointments.sort((a, b) => new Date(b.date) - new Date(a.date));
+            appointments.sort((a, b) => new Date(b.appointment_time) - new Date(a.appointment_time));
             
             appointments.forEach(appointment => {
                 const row = document.createElement('tr');
@@ -500,7 +508,7 @@
                 
                 row.innerHTML = `
                     <td>${appointment.id}</td>
-                    <td>${formatDateTime(appointment.date)}</td>
+                    <td>${formatDateTime(appointment.appointment_time)}</td>
                     <td>${appointment.patient}</td>
                     <td>${appointment.provider}</td>
                     <td>${appointment.reason}</td>
@@ -517,105 +525,6 @@
             });
         }
         
-        function generateSampleAppointments() {
-            // This is only used for demo purposes
-            // In a real application, this data would come from an API
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            const nextWeek = new Date(today);
-            nextWeek.setDate(nextWeek.getDate() + 7);
-            
-            const lastWeek = new Date(today);
-            lastWeek.setDate(lastWeek.getDate() - 7);
-            
-            return [
-                {
-                    id: 1,
-                    date: today.toISOString(),
-                    patient: 'Calderon, Stacey',
-                    provider: 'Dr. Smith',
-                    reason: 'Annual Physical',
-                    status: 'Scheduled'
-                },
-                {
-                    id: 2,
-                    date: today.toISOString(),
-                    patient: 'Williams, Ian',
-                    provider: 'Dr. Johnson',
-                    reason: 'Follow-up',
-                    status: 'Scheduled'
-                },
-                {
-                    id: 3,
-                    date: tomorrow.toISOString(),
-                    patient: 'Castaneda, Michael',
-                    provider: 'Dr. Smith',
-                    reason: 'Vaccination',
-                    status: 'Scheduled'
-                },
-                {
-                    id: 4,
-                    date: yesterday.toISOString(),
-                    patient: 'Howard, Matthew',
-                    provider: 'Dr. Brown',
-                    reason: 'Illness',
-                    status: 'Completed'
-                },
-                {
-                    id: 5,
-                    date: yesterday.toISOString(),
-                    patient: 'Torres, Sophia',
-                    provider: 'Dr. Johnson',
-                    reason: 'Lab Results',
-                    status: 'Completed'
-                },
-                {
-                    id: 6,
-                    date: nextWeek.toISOString(),
-                    patient: 'Calderon, Stacey',
-                    provider: 'Dr. Brown',
-                    reason: 'Specialist Referral',
-                    status: 'Scheduled'
-                },
-                {
-                    id: 7,
-                    date: lastWeek.toISOString(),
-                    patient: 'Williams, Ian',
-                    provider: 'Dr. Smith',
-                    reason: 'Medication Refill',
-                    status: 'Canceled'
-                },
-                {
-                    id: 8,
-                    date: today.toISOString(),
-                    patient: 'Howard, Matthew',
-                    provider: 'Dr. Johnson',
-                    reason: 'Urgent Care',
-                    status: 'Scheduled'
-                },
-                {
-                    id: 9,
-                    date: tomorrow.toISOString(),
-                    patient: 'Torres, Sophia',
-                    provider: 'Dr. Smith',
-                    reason: 'Consultation',
-                    status: 'Scheduled'
-                },
-                {
-                    id: 10,
-                    date: lastWeek.toISOString(),
-                    patient: 'Castaneda, Michael',
-                    provider: 'Dr. Brown',
-                    reason: 'Follow-up',
-                    status: 'Completed'
-                }
-            ];
-        }
         
         function formatDate(dateObj) {
             return new Date(dateObj).toLocaleDateString('en-US', { 

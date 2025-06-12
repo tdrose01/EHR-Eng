@@ -6,6 +6,7 @@ A web-based Electronic Health Record system designed for military healthcare pro
 
 - **User Authentication**: Secure login system for healthcare providers
 - **Patient Management**: Add, view, edit, and manage patient records
+- **Appointments Management**: Schedule and review patient appointments
 - **Dashboard**: Overview of key statistics (total patients, active patients, today's appointments, pending records)
 - **Detail Views**: Specialized pages for patients, appointments, and medical records
 - **Responsive Design**: Dark-themed UI optimized for healthcare environments
@@ -15,19 +16,23 @@ A web-based Electronic Health Record system designed for military healthcare pro
 The application consists of three main components:
 
 1. **Frontend**: HTML/CSS/JavaScript web interface
-2. **Authentication API**: Handles user login and session management (Port 8000)
+2. **Authentication API**: Handles user login and session management (Port 8001)
 3. **Patient API**: Provides patient data and medical record functionality (Port 8002)
-4. **HTTP Server**: Serves static files for the frontend (Port 8080)
+4. **Appointments API**: Manages scheduling and retrieval of appointment data (Port 8003)
+5. **HTTP Server**: Serves static files for the frontend (Port 8080)
 
 ## Database Schema
 
 The system uses PostgreSQL with the following key tables:
 - `users`: Healthcare providers with login credentials
 - `patients`: Patient demographic and medical information
-- `login_history`: Record of user login events
+- `login_history`: Table storing a history of successful and failed user login attempts
 - `ranks`: Military rank reference data
 - `services`: Military service branch reference data
 - `fmpcs`: Family Member Prefix Code reference data
+
+The login events table is named `login_history`. Older scripts may refer to
+`user_logins`, but the correct table name in this project is `login_history`.
 
 ## Setup Instructions
 
@@ -51,13 +56,13 @@ python setup_db_tables.py
 
 ### Environment Configuration
 
-Create a `.env` file in the project root with the following variables:
+Create a `.env` file in the project root containing your database connection settings:
 ```
-DB_NAME=ehr_db
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_HOST=localhost
-DB_PORT=5432
+DB_NAME=ehr_db       # PostgreSQL database name
+DB_USER=postgres     # Database user
+DB_PASSWORD=your_password  # Database user's password
+DB_HOST=localhost    # Database host
+DB_PORT=5432         # Database port
 ```
 
 Optionally, set `ENV_PATH` to point to a custom environment file before running
@@ -66,9 +71,11 @@ any scripts. If not set, `.env` in the project root is used.
 ### Starting the Servers
 
 1. Start the HTTP server: `python -m http.server 8080`
-2. Start the Authentication API: `python auth_api.py`
-3. Start the Patient API: `python patient_api.py`
+2. Start the Authentication API: `python login_api.py` (runs on port 8001)
+3. Start the Patient API: `python patient_api.py` (runs on port 8002)
+4. Start the Appointments API: `python appointments_api.py` (runs on port 8003)
 
+Alternatively, run `python start_servers.py` to launch the HTTP, authentication, and patient APIs together. The appointments API should be started in a separate terminal.
 ## Usage
 
 1. Access the application at `http://localhost:8080/login.html`

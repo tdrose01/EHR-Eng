@@ -43,6 +43,12 @@ The system uses PostgreSQL with the following key tables:
 2. Run the database setup script: `python setup_db_tables.py`
 3. Create a test user: `python create_test_user.py`
 
+If you created the database before this version, drop the old `user_logins` table and recreate the tables to use `login_history` and the `hashed_password` column:
+```bash
+psql -d ehr_db -c "DROP TABLE IF EXISTS user_logins";
+python setup_db_tables.py
+```
+
 ### Environment Configuration
 
 Create a `.env` file in the project root with the following variables:

@@ -67,7 +67,7 @@ def create_tables(conn):
             username VARCHAR(50) UNIQUE NOT NULL,
             email VARCHAR(100) UNIQUE NOT NULL,
             full_name VARCHAR(100) NOT NULL,
-            password_hash VARCHAR(255) NOT NULL,
+            hashed_password VARCHAR(255) NOT NULL,
             role VARCHAR(20) NOT NULL DEFAULT 'user',
             is_active BOOLEAN NOT NULL DEFAULT TRUE,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -75,11 +75,11 @@ def create_tables(conn):
         )
         """,
         """
-        CREATE TABLE IF NOT EXISTS user_logins (
+        CREATE TABLE IF NOT EXISTS login_history (
             id SERIAL PRIMARY KEY,
             user_id INTEGER REFERENCES users(id),
-            login_time TIMESTAMP NOT NULL,
-            ip_address VARCHAR(45) NOT NULL,
+            timestamp TIMESTAMP NOT NULL,
+            "ipAddress" VARCHAR(45) NOT NULL,
             success BOOLEAN NOT NULL,
             user_agent VARCHAR(255)
         )
@@ -163,7 +163,7 @@ def insert_sample_data(conn):
     """Insert sample data into the EHR system"""
     commands = [
         """
-        INSERT INTO users (username, email, full_name, password_hash, role)
+        INSERT INTO users (username, email, full_name, hashed_password, role)
         VALUES 
             ('admin', 'admin@example.com', 'Administrator', 
              '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'admin'),

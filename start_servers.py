@@ -50,8 +50,6 @@ def start_api_server():
         # Start Flask API server
         api_process = subprocess.Popen(
             [python_exe, "login_api.py"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
             text=True
         )
         
@@ -90,8 +88,6 @@ def start_patient_api_server():
         # Start Flask API server
         api_process = subprocess.Popen(
             [python_exe, "patient_api.py"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
             text=True
         )
         
@@ -166,8 +162,6 @@ def start_http_server():
         # Start Python's HTTP server
         http_process = subprocess.Popen(
             [python_exe, "-m", "http.server", str(HTTP_PORT)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
             text=True
         )
         

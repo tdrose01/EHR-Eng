@@ -5,8 +5,9 @@ import hashlib
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv('ehr-project/backend/.env')
+# Load environment variables from .env file (configurable via ENV_PATH)
+env_path = os.getenv('ENV_PATH', '.env')
+load_dotenv(env_path)
 
 # Database connection parameters
 DB_CONFIG = {

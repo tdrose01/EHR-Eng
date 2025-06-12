@@ -207,9 +207,16 @@
             </div>
             <button class="edit-button">Edit Patient</button>
         </div>
-        
-        <!-- Patient Information Table -->
-        <div class="section">
+
+        <div class="tab-container">
+            <div class="tabs">
+                <div class="tab active" data-tab="overviewTab">Overview</div>
+                <div class="tab" data-tab="recordsTab">Medical Records</div>
+            </div>
+
+            <div id="overviewTab" class="tab-content">
+                <!-- Patient Information Table -->
+                <div class="section">
             <h2>Patient Information</h2>
             <table>
                 <tr>
@@ -296,6 +303,12 @@
                 </tr>
             </table>
         </div>
+            </div> <!-- end overviewTab -->
+
+            <div id="recordsTab" class="tab-content hidden">
+                <p>Medical records content goes here.</p>
+            </div>
+        </div> <!-- end tab-container -->
     </div>
     
     <script>
@@ -366,8 +379,24 @@
             return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
         }
         
-        // Load patient data when the page loads
-        document.addEventListener('DOMContentLoaded', fetchPatientData);
+        // Initialize page when loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchPatientData();
+            setupTabs();
+        });
+
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                    this.classList.add('active');
+                    const target = document.getElementById(this.dataset.tab);
+                    if (target) target.classList.remove('hidden');
+                });
+            });
+        }
     </script>
 </body>
 </html> 

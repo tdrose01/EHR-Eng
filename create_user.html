@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create User</title>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --accent-color: #4d8bf0;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+            --hover-color: #2d5ca8;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background-color: var(--secondary-bg);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+        }
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: var(--hover-color);
+        }
+        .status {
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Create User</h2>
+        <form id="createUserForm">
+            <label for="username">Username</label>
+            <input type="text" id="username" required>
+            <label for="email">Email</label>
+            <input type="email" id="email" required>
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+            <label for="role">Role</label>
+            <select id="role">
+                <option value="admin">admin</option>
+                <option value="doctor">doctor</option>
+                <option value="patient">patient</option>
+            </select>
+            <button type="submit">Create User</button>
+        </form>
+        <div class="status" id="status"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('createUserForm');
+            const statusDiv = document.getElementById('status');
+            const token = localStorage.getItem('ehrToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+                const data = {
+                    username: document.getElementById('username').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    role: document.getElementById('role').value
+                };
+                fetch('http://localhost:8001/admin/create_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(r => r.json())
+                .then(resp => {
+                    statusDiv.style.display = 'block';
+                    if (resp.success) {
+                        statusDiv.style.color = 'var(--success-color)';
+                        statusDiv.textContent = 'User created successfully';
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1000);
+                    } else {
+                        statusDiv.style.color = 'var(--danger-color)';
+                        statusDiv.textContent = resp.message || 'Error creating user';
+                    }
+                })
+                .catch(err => {
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.color = 'var(--danger-color)';
+                    statusDiv.textContent = err.toString();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

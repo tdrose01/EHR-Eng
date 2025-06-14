@@ -10,6 +10,8 @@ A web-based Electronic Health Record system designed for military healthcare pro
 - **Dashboard**: Overview of key statistics (total patients, active patients, today's appointments, pending records)
 - **Detail Views**: Specialized pages for patients, appointments, and medical records
 - **Responsive Design**: Dark-themed UI optimized for healthcare environments
+- **Admin User Management**: Admins can add new users via `/admin/create_user`
+- **Secure Password Hashing**: New accounts use bcrypt while legacy SHA-256 hashes are still supported
 
 ## System Architecture
 
@@ -82,6 +84,10 @@ Alternatively, run `python start_servers.py` to launch the HTTP, authentication,
 2. Alternatively, use the Vue-based login at `http://localhost:8080/login_vue.html`
 3. Login with provided credentials
 4. Navigate through the dashboard to access patients, appointments, and records
+
+### Admin User Creation
+
+Logged-in admins can add new users. Use the **Create User** button on the dashboard or open `http://localhost:8001/admin/create_user` with your session token. Submit a username, email, password and role. Passwords are stored using bcrypt hashing.
 
 ## Testing
 

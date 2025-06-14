@@ -3,6 +3,7 @@ import sys
 import json
 import psycopg2
 import hashlib
+from passlib.hash import bcrypt
 import base64
 from datetime import datetime
 from flask import Flask, request, jsonify
@@ -48,6 +49,16 @@ def hash_password(password):
     hashed = hashlib.sha256(password_salt.encode()).hexdigest()
     return hashed
 
+def secure_hash_password(password: str) -> str:
+    """Hash a password using bcrypt."""
+    return bcrypt.hash(password)
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    """Verify password against stored hash supporting legacy SHA-256."""
+    if stored_hash.startswith('$2a$') or stored_hash.startswith('$2b$'):
+        return bcrypt.verify(password, stored_hash)
+    return hash_password(password) == stored_hash
+
 @app.route('/api/login', methods=['POST'])
 def login():
     """API endpoint to handle user login"""
@@ -80,11 +91,8 @@ def login():
         
         user_id, db_username, hashed_password = user_data
 
-        # Hash the provided password
-        hashed_input = hash_password(password)
-
-        # Check if password hashes match
-        if hashed_input != hashed_password:
+        # Verify password
+        if not verify_password(password, hashed_password):
             # Record failed login attempt
             try:
                 cursor.execute(
@@ -134,6 +142,74 @@ def login():
         cursor.close()
         conn.close()
 
+@app.route('/admin/create_user', methods=['GET', 'POST'])
+def create_user():
+    """Allow admins to create new users"""
+    token = request.headers.get('Authorization') or request.args.get('token')
+    if not token:
+        return "Unauthorized", 401
+
+    try:
+        decoded = base64.b64decode(token).decode()
+        requesting_user = decoded.split(':', 1)[0]
+    except Exception:
+        return "Invalid token", 401
+
+    conn = get_db_connection()
+    if not conn:
+        return "Database connection failed", 500
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT role FROM users WHERE username = %s", (requesting_user,))
+        row = cursor.fetchone()
+        if not row or row[0] != 'admin':
+            return "Forbidden", 403
+
+        if request.method == 'GET':
+            cursor.close()
+            conn.close()
+            from flask import send_from_directory
+            return send_from_directory('.', 'create_user.html')
+
+        data = request.get_json() or request.form
+        required = {'username', 'email', 'password', 'role'}
+        if not data or not required.issubset(data.keys()):
+            return jsonify({"success": False, "message": "Missing fields"}), 400
+
+        new_username = data['username']
+        new_email = data['email']
+        new_password = data['password']
+        new_role = data['role']
+
+        cursor.execute(
+            "SELECT id FROM users WHERE username = %s OR email = %s",
+            (new_username, new_email)
+        )
+        if cursor.fetchone():
+            return jsonify({"success": False, "message": "Username or email already exists"}), 400
+
+        hashed = secure_hash_password(new_password)
+        now = datetime.now()
+        cursor.execute(
+            """
+            INSERT INTO users (username, email, hashed_password, role, created_at)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id
+            """,
+            (new_username, new_email, hashed, new_role, now)
+        )
+        new_id = cursor.fetchone()[0]
+        conn.commit()
+        return jsonify({"success": True, "user_id": new_id})
+    except Exception as e:
+        conn.rollback()
+        print(f"Create user error: {e}")
+        return jsonify({"success": False, "message": "Server error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.route('/api/change-password', methods=['POST'])
 def change_password():
     """Allow a user to change their password"""
@@ -164,10 +240,10 @@ def change_password():
             return jsonify({"success": False, "message": "User not found"}), 404
 
         user_id, current_hash = user
-        if hash_password(old_password) != current_hash:
+        if not verify_password(old_password, current_hash):
             return jsonify({"success": False, "message": "Current password is incorrect"}), 401
 
-        new_hash = hash_password(new_password)
+        new_hash = secure_hash_password(new_password)
         cursor.execute(
             "UPDATE users SET hashed_password = %s WHERE id = %s",
             (new_hash, user_id)

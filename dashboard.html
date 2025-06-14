@@ -422,6 +422,7 @@
                         Recent Patients
                         <div>
                             <button class="btn" id="addPatientBtn">Add Patient</button>
+                            <button class="btn" id="createUserBtn">Create User</button>
                             <button class="btn" id="refreshBtn">Refresh</button>
                         </div>
                     </h3>
@@ -544,6 +545,15 @@
             // Navigate to add patient page
             document.getElementById('addPatientBtn').addEventListener('click', function() {
                 window.location.href = 'add_patient.html';
+            });
+
+            document.getElementById('createUserBtn').addEventListener('click', function() {
+                const token = localStorage.getItem('ehrToken');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                window.location.href = 'http://localhost:8001/admin/create_user?token=' + encodeURIComponent(token);
             });
             
             // Set up search button

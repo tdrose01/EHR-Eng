@@ -4,6 +4,7 @@ import psycopg2
 from psycopg2 import sql
 from datetime import datetime
 from dotenv import load_dotenv
+import hashlib
 
 # Load environment variables from .env file (configurable via ENV_PATH)
 env_path = os.getenv('ENV_PATH', '.env')
@@ -172,47 +173,49 @@ def create_tables(conn):
         print(f"Error creating tables: {error}")
         conn.rollback()
 
+def hash_password(password):
+    """Hash a password using the same method as the login API."""
+    salt = "ehr_salt"
+    return hashlib.sha256((password + salt).encode()).hexdigest()
+
+
 def insert_sample_data(conn):
     """Insert sample data into the EHR system"""
-    commands = [
-        """
-        INSERT INTO users (username, email, full_name, hashed_password, role)
-        VALUES 
-            ('admin', 'admin@example.com', 'Administrator', 
-             '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'admin'),
-            ('doctor1', 'doctor1@example.com', 'Dr. John Smith', 
-             '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'doctor'),
-            ('nurse1', 'nurse1@example.com', 'Jane Doe, RN', 
-             '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'nurse')
-        ON CONFLICT (username) DO NOTHING
-        """,
-        """
-        INSERT INTO patients (medical_record_number, first_name, last_name, date_of_birth, gender, 
-                            address, phone, email, insurance_provider, insurance_id)
-        VALUES 
-            ('MRN12345', 'John', 'Doe', '1975-05-15', 'Male', 
-             '123 Main St, Anytown, ST 12345', '555-123-4567', 'john.doe@example.com', 
-             'Blue Cross', 'BC123456789'),
-            ('MRN67890', 'Jane', 'Smith', '1980-08-20', 'Female', 
-             '456 Oak Ave, Sometown, ST 67890', '555-987-6543', 'jane.smith@example.com', 
-             'Aetna', 'AE987654321')
-        ON CONFLICT (medical_record_number) DO NOTHING
-        """
-    ]
-    
     try:
         cur = conn.cursor()
-        # Execute each command
-        for command in commands:
-            print(f"Executing: {command[:60]}...")
-            cur.execute(command)
-        
-        # Close the cursor
+
+        users = [
+            ("admin", "admin@example.com", "Administrator", hash_password("adminpass123"), "admin"),
+            ("doctor1", "doctor1@example.com", "Dr. John Smith", hash_password("password"), "doctor"),
+            ("nurse1", "nurse1@example.com", "Jane Doe, RN", hash_password("password"), "nurse"),
+        ]
+
+        cur.executemany(
+            """
+            INSERT INTO users (username, email, full_name, hashed_password, role)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (username) DO NOTHING
+            """,
+            users,
+        )
+
+        cur.execute(
+            """
+            INSERT INTO patients (medical_record_number, first_name, last_name, date_of_birth, gender,
+                                address, phone, email, insurance_provider, insurance_id)
+            VALUES
+                ('MRN12345', 'John', 'Doe', '1975-05-15', 'Male',
+                 '123 Main St, Anytown, ST 12345', '555-123-4567', 'john.doe@example.com',
+                 'Blue Cross', 'BC123456789'),
+                ('MRN67890', 'Jane', 'Smith', '1980-08-20', 'Female',
+                 '456 Oak Ave, Sometown, ST 67890', '555-987-6543', 'jane.smith@example.com',
+                 'Aetna', 'AE987654321')
+            ON CONFLICT (medical_record_number) DO NOTHING
+            """
+        )
+
         cur.close()
-        
-        # Commit the changes
         conn.commit()
-        
         print("Sample data inserted successfully!")
     except (Exception, psycopg2.DatabaseError) as error:
         print(f"Error inserting sample data: {error}")

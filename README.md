@@ -60,8 +60,8 @@ python setup_db_tables.py
 
 ### Environment Configuration
 
-Copy `README.md.env` to `.env` in the project root and fill in your database
-connection settings:
+Create a `.env` file in the project root containing your database connection
+settings:
 ```
 DB_NAME=ehr_db       # PostgreSQL database name
 DB_USER=postgres     # Database user

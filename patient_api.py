@@ -332,6 +332,43 @@ def add_patient():
         cursor.close()
         conn.close()
 
+@app.route('/api/patients/<int:patient_id>/notes', methods=['POST'])
+def add_patient_note(patient_id):
+    """Add a clinical note for a patient."""
+    data = request.get_json()
+
+    if not data or 'note' not in data:
+        return jsonify({"success": False, "message": "Note is required"}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"success": False, "message": "Database connection failed"}), 500
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT patient_id FROM patients WHERE patient_id = %s", (patient_id,))
+        if cursor.fetchone() is None:
+            return jsonify({"success": False, "message": "Patient not found"}), 404
+
+        cursor.execute(
+            """
+            INSERT INTO patient_notes (patient_id, note, created_at)
+            VALUES (%s, %s, NOW())
+            RETURNING id
+            """,
+            (patient_id, data['note'])
+        )
+        note_id = cursor.fetchone()[0]
+        conn.commit()
+        return jsonify({"success": True, "note_id": note_id})
+    except Exception as e:
+        conn.rollback()
+        print(f"Error adding note: {e}")
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.route('/api/patients/<int:patient_id>', methods=['PUT'])
 def update_patient(patient_id):
     """API endpoint to update a patient's data"""

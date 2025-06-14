@@ -303,6 +303,17 @@
                 </tr>
             </table>
         </div>
+
+        <!-- Add Clinical Note -->
+        <div class="section">
+            <h2>Add Clinical Note</h2>
+            <form id="note-form">
+                <textarea id="note-text" rows="4" style="width:100%;" required></textarea>
+                <br>
+                <button type="submit" class="edit-button">Submit Note</button>
+                <span id="note-message" style="margin-left:10px;"></span>
+            </form>
+        </div>
             </div> <!-- end overviewTab -->
 
             <div id="recordsTab" class="tab-content hidden">
@@ -383,7 +394,40 @@
         document.addEventListener('DOMContentLoaded', function() {
             fetchPatientData();
             setupTabs();
+            const form = document.getElementById('note-form');
+            if (form) {
+                form.addEventListener('submit', submitNote);
+            }
         });
+
+        async function submitNote(event) {
+            event.preventDefault();
+            const noteText = document.getElementById('note-text');
+            const noteMessage = document.getElementById('note-message');
+            const note = noteText.value.trim();
+            if (!note) {
+                noteMessage.textContent = 'Note cannot be empty';
+                return;
+            }
+            const patientId = getUrlParameter('id') || '2';
+            try {
+                const resp = await fetch(`/api/patients/${patientId}/notes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ note })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    noteMessage.textContent = 'Note added successfully';
+                    noteText.value = '';
+                } else {
+                    noteMessage.textContent = data.message || 'Error adding note';
+                }
+            } catch (err) {
+                console.error('Error adding note:', err);
+                noteMessage.textContent = 'Server error';
+            }
+        }
 
         function setupTabs() {
             const tabs = document.querySelectorAll('.tab');

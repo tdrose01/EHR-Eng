@@ -12,6 +12,7 @@ A web-based Electronic Health Record system designed for military healthcare pro
 - **Responsive Design**: Dark-themed UI optimized for healthcare environments
 - **Admin User Management**: Admins can add new users via `/admin/create_user`
 - **Secure Password Hashing**: New accounts use bcrypt while legacy SHA-256 hashes are still supported
+- **Clinical Notes**: Add clinical notes to a patient record via the `/api/patients/<patient_id>/notes` endpoint
 
 ## System Architecture
 
@@ -32,6 +33,7 @@ The system uses PostgreSQL with the following key tables:
 - `ranks`: Military rank reference data
 - `services`: Military service branch reference data
 - `fmpcs`: Family Member Prefix Code reference data
+- `patient_notes`: Stores clinical notes linked to each patient
 
 The login events table is named `login_history`. Older scripts may refer to
 `user_logins`, but the correct table name in this project is `login_history`.
@@ -58,7 +60,8 @@ python setup_db_tables.py
 
 ### Environment Configuration
 
-Create a `.env` file in the project root containing your database connection settings:
+Create a `.env` file in the project root containing your database connection
+settings:
 ```
 DB_NAME=ehr_db       # PostgreSQL database name
 DB_USER=postgres     # Database user

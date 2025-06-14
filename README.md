@@ -1,98 +1,102 @@
 # Military Electronic Health Record (EHR) System
 
-A web-based Electronic Health Record system designed for military healthcare providers. This application allows healthcare providers to manage patient records, appointments, and medical data with a user-friendly interface.
+This repository contains a small Electronic Health Record system used in the Codex examples. It includes several Flask APIs, a static HTML frontend and scripts for setting up a PostgreSQL database.
+
+## Table of Contents
+- [Features](#features)
+- [Architecture](#architecture)
+- [API Reference](#api-reference)
+- [Environment Variables](#environment-variables)
+- [Setup](#setup)
+- [Running the Application](#running-the-application)
+- [Frontend Overview](#frontend-overview)
+- [License](#license)
 
 ## Features
+- **User Authentication** – secure login API
+- **Patient Management** – CRUD endpoints for patient records
+- **Appointments Management** – schedule and manage appointments
+- **Dashboard Stats** – simple statistics for the dashboard page
 
-- **User Authentication**: Secure login system for healthcare providers
-- **Patient Management**: Add, view, edit, and manage patient records
-- **Appointments Management**: Schedule and review patient appointments
-- **Dashboard**: Overview of key statistics (total patients, active patients, today's appointments, pending records)
-- **Detail Views**: Specialized pages for patients, appointments, and medical records
-- **Responsive Design**: Dark-themed UI optimized for healthcare environments
+## Architecture
+The system is split into multiple services:
+1. **Login API** (`login_api.py`) – runs on port **8001**
+2. **Patient API** (`patient_api.py`) – runs on port **8002**
+3. **Appointments API** (`appointments_api.py`) – runs on port **8003**
+4. **Static HTML server** – serves the contents of this repository on port **8080**
 
-## System Architecture
+Each service reads database settings from a `.env` file.
 
-The application consists of three main components:
+## API Reference
+### Authentication
+| Method | Route | Description |
+|-------|-------|-------------|
+| `POST` | `/api/login` | Validate username and password. Expects JSON `{"username": "...", "password": "..."}` and returns `{ success, token, user }` on success. |
+| `POST` | `/api/change-password` | Update a user's password. JSON body must contain `username`, `old_password` and `new_password`. Returns `{ success, message }`. |
 
-1. **Frontend**: HTML/CSS/JavaScript web interface
-2. **Authentication API**: Handles user login and session management (Port 8001)
-3. **Patient API**: Provides patient data and medical record functionality (Port 8002)
-4. **Appointments API**: Manages scheduling and retrieval of appointment data (Port 8003)
-5. **HTTP Server**: Serves static files for the frontend (Port 8080)
+### Patients
+| Method | Route | Description |
+|-------|-------|-------------|
+| `GET` | `/api/patients` | List patients. Accepts `search`, `limit` and `offset` query parameters. Returns `{ success, total, limit, offset, patients }`. |
+| `GET` | `/api/patients/<patient_id>` | Retrieve a single patient record. Returns `{ success, patient }`. |
+| `POST` | `/api/patients` | Create a new patient. Body should contain patient fields such as `first_name`, `last_name`, etc. Returns `{ success, patient_id }` when created. |
+| `PUT` | `/api/patients/<patient_id>` | Update an existing patient with the provided JSON fields. Returns `{ success, patient_id }`. |
+| `GET` | `/api/dashboard-stats` | Basic statistics for the dashboard. Returns `{ success, stats }`. |
 
-## Database Schema
+### Appointments
+| Method | Route | Description |
+|-------|-------|-------------|
+| `GET` | `/api/appointments` | List appointments with optional `limit` and `offset` query parameters. Returns `{ success, appointments }`. |
+| `GET` | `/api/appointments/<appointment_id>` | Retrieve one appointment. Returns `{ success, appointment }`. |
+| `POST` | `/api/appointments` | Create an appointment with fields `patient_id`, `provider_id`, `appointment_time`, `reason` and optional `status`. Returns `{ success, appointment_id }`. |
+| `PUT` | `/api/appointments/<appointment_id>` | Update an appointment. Body may contain any of the appointment fields. Returns `{ success, message }`. |
+| `DELETE` | `/api/appointments/<appointment_id>` | Delete an appointment. Returns `{ success, message }`. |
 
-The system uses PostgreSQL with the following key tables:
-- `users`: Healthcare providers with login credentials
-- `patients`: Patient demographic and medical information
-- `login_history`: Table storing a history of successful and failed user login attempts
-- `ranks`: Military rank reference data
-- `services`: Military service branch reference data
-- `fmpcs`: Family Member Prefix Code reference data
+## Environment Variables
+Create a `.env` file in the project root containing your PostgreSQL connection settings:
+```
+DB_NAME=<database name>
+DB_USER=<database user>
+DB_PASSWORD=<user password>
+DB_HOST=<database host>
+DB_PORT=<database port>
+```
+All scripts use this file by default. You can override the location by setting the `ENV_PATH` environment variable before running any script.
 
-The login events table is named `login_history`. Older scripts may refer to
-`user_logins`, but the correct table name in this project is `login_history`.
+## Setup
+1. **Create a virtual environment**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **Initialize the database** (requires PostgreSQL)
+   ```bash
+   python setup_db_tables.py
+   python create_test_user.py
+   ```
+   The test user created by `create_test_user.py` has username `ehrtest` and password `testpassword123`.
 
-## Setup Instructions
-
-### Prerequisites
-
-- Python 3.8+ 
-- PostgreSQL 12+
-- Required Python packages: flask, psycopg2, python-dotenv, passlib, flask-cors
-
-### Database Setup
-
-1. Create a PostgreSQL database named `ehr_db`
-2. Run the database setup script: `python setup_db_tables.py`
-3. Create a test user: `python create_test_user.py`
-
-If you created the database before this version, drop the old `user_logins` table and recreate the tables to use `login_history` and the `hashed_password` column:
+## Running the Application
+You may run the servers individually:
 ```bash
-psql -d ehr_db -c "DROP TABLE IF EXISTS user_logins";
-python setup_db_tables.py
+python login_api.py          # port 8001
+python patient_api.py        # port 8002
+python appointments_api.py   # port 8003
+python -m http.server 8080   # serves HTML files
 ```
-
-### Environment Configuration
-
-Create a `.env` file in the project root containing your database connection settings:
+Or launch them all at once:
+```bash
+python start_servers.py
 ```
-DB_NAME=ehr_db       # PostgreSQL database name
-DB_USER=postgres     # Database user
-DB_PASSWORD=your_password  # Database user's password
-DB_HOST=localhost    # Database host
-DB_PORT=5432         # Database port
-```
+After all services start, open `http://localhost:8080/login.html` and log in with the test credentials.
 
-Optionally, set `ENV_PATH` to point to a custom environment file before running
-any scripts. If not set, `.env` in the project root is used.
-
-### Starting the Servers
-
-1. Start the HTTP server: `python -m http.server 8080`
-2. Start the Authentication API: `python login_api.py` (runs on port 8001)
-3. Start the Patient API: `python patient_api.py` (runs on port 8002)
-4. Start the Appointments API: `python appointments_api.py` (runs on port 8003)
-
-Alternatively, run `python start_servers.py` to launch the HTTP, authentication, and patient APIs together. The appointments API should be started in a separate terminal.
-## Usage
-
-1. Access the application at `http://localhost:8080/login.html`
-2. Alternatively, use the Vue-based login at `http://localhost:8080/login_vue.html`
-3. Login with provided credentials
-4. Navigate through the dashboard to access patients, appointments, and records
-
-## Testing
-
-Test users:
-- Admin: `admin` / `adminpass123`
-- Test user: `ehrtest` / `testpassword123`
-
-## Contributors
-
-This EHR system was developed as a project for military healthcare management.
+## Frontend Overview
+The HTML files in this repository (`login.html`, `dashboard.html`, `add_patient.html`, etc.) call the Flask APIs on ports 8001–8003. Login requests hit the Login API, while patient and appointment pages fetch data from the respective APIs. Static files are served by a simple Python HTTP server.
 
 ## License
+This project is licensed under the MIT License. See `LICENSE` for details.
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
